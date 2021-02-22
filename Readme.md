@@ -13,7 +13,7 @@ About this repo
 
 This code repository serves as a public snapshot of the core components of the DESaccess service deployed for the DR2 public data release, including a snapshot of the deployment of the [DR2 data release documentation website](https://des.ncsa.illinois.edu/releases/dr2).
 
-Documentation about this deployment system can be found in `/docs/index.rst` which defines the top of the Sphinx-based documentation tree.
+Documentation about this [deployment framework](/docs/deployment_framework/deployment_framework.rst) can be found in [the Sphinx-based documentation system](/docs/index.rst).
 
 Learn more 
 ---------------------
