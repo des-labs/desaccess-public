@@ -1,0 +1,16 @@
+#@data/values
+---
+app_name: desaccess
+app_deploy_path_name: desaccess
+service_port: 8080
+service_port_backend: 8888
+debug_job: "false"
+# This list could be specified differently for public and private interfaces
+desaccess_jira_default_assignee: 'alice'
+# The job limits are set in the namespace configs for the public/private interface distinction:
+# LIMIT_JOB_DURATION_HOURS: 24
+# LIMIT_CUTOUTS_CONCURRENT_JOBS: 10
+# LIMIT_CUTOUTS_CUTOUTS_PER_JOB: 5000
+DESACCESS_JOB_FILES_LIFETIME: 1209600       # 10 days
+DESACCESS_JOB_FILES_WARNING_PERIOD: 345600    #  4 days
+DESACCESS_JOB_FILES_MAX_RENEWALS: 2

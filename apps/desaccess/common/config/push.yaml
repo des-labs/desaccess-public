@@ -1,0 +1,66 @@
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+
+#@ if/end data.values.push_images :
+---
+apiVersion: kbld.k14s.io/v1alpha1
+kind: ImageDestinations
+destinations:
+- image: (@= data.values.app_name @)-frontend
+  newImage: "(@= data.values.image_repo_base @)/des/(@= data.values.app_name @)-frontend"
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+
+#@ if/end data.values.push_images :
+---
+apiVersion: kbld.k14s.io/v1alpha1
+kind: ImageDestinations
+destinations:
+- image: (@= data.values.app_name @)-backend
+  newImage: "(@= data.values.image_repo_base @)/des/(@= data.values.app_name @)-backend"
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+
+#@ if/end data.values.push_images :
+---
+apiVersion: kbld.k14s.io/v1alpha1
+kind: ImageDestinations
+destinations:
+- image: (@= data.values.app_name @)-jlab-server
+  newImage: "(@= data.values.image_repo_base @)/des/(@= data.values.app_name @)-jlab-server"
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+
+#@ if/end data.values.push_images :
+---
+apiVersion: kbld.k14s.io/v1alpha1
+kind: ImageDestinations
+destinations:
+- image: (@= data.values.app_name @)-task-cutout
+  newImage: "(@= data.values.image_repo_base @)/des/(@= data.values.app_name @)-task-cutout"
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+
+#@ if/end data.values.push_images :
+---
+apiVersion: kbld.k14s.io/v1alpha1
+kind: ImageDestinations
+destinations:
+- image: (@= data.values.app_name @)-task-query
+  newImage: "(@= data.values.image_repo_base @)/des/(@= data.values.app_name @)-task-query"
+
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+
+#@ if/end data.values.push_images :
+---
+apiVersion: kbld.k14s.io/v1alpha1
+kind: ImageDestinations
+destinations:
+- image: (@= data.values.app_name @)-desaccess-docs
+  newImage: "(@= data.values.image_repo_base @)/des/(@= data.values.app_name @)-desaccess-docs"

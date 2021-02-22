@@ -1,0 +1,21 @@
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+#! # Define resources here
+#! # -------------------------
+#! kind: Deployment
+#! apiVersion: apps/v1
+#! metadata:
+#!   name: (@= data.values.app_name @)
+#!   namespace: #@ data.values.namespace
+#! spec:
+#!   selector:
+#!     matchLabels:
+#!       app: (@= data.values.app_name @)
+#!   replicas: #@ data.values.replicas
+#!   template:
+#!     metadata:
+#!       labels:
+#!         app: (@= data.values.app_name @)
+#!     spec:
+#!     ...

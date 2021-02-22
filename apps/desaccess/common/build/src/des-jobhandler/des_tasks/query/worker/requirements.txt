@@ -1,0 +1,5 @@
+pyyaml
+requests
+rpdb
+tables
+h5py

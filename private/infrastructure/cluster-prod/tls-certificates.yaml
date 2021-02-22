@@ -1,0 +1,11 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tls-certificate
+  namespace: default
+type: kubernetes.io/tls
+data:
+  tls.crt: LS0...Q==
+  tls.key: LS0...S0K

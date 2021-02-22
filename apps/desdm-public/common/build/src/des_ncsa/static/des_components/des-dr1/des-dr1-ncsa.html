@@ -1,0 +1,74 @@
+<dom-module id="des-dr1-ncsa">
+
+
+<template>
+
+<style include="shared-styles">
+:host {
+       padding: 10px;
+       }
+
+</style>
+
+<div class="fixup" id="ncsa_top"></div>
+<div class="fixdown"></div>
+<paper-dialog id="dialogfig3">
+            <des-img-big  src="{{rootPath}}static/images/DESaccess.png" on-tap="_dialog" data-item="3">
+            Figure 3. Schema for DESaccess arquitecture
+            </des-img-big>
+  <div class="buttons">
+    <paper-button class="desButton" raised dialog-confirm autofocus>Close</paper-button>
+  </div>
+</paper-dialog>
+
+<des-card heading = 'NCSA DESaccess'>
+    <div class=card-content>
+
+    <paper-button class="desButton" raised on-tap="_goncsa">Go to DESaccess</paper-button>
+    <br />
+
+         <p>NCSA provides a primary set of basic web applications and a programmatic API to access DES Release data. Developed at NCSA, <a href="https://des.ncsa.illinois.edu/desaccess">DESaccess</a> provides an interface to submit asynchronous jobs that perform potentially lengthy operations involving the DES Release catalogs stored on the co-located Oracle database. These jobs include executing SQL statements and generating cutouts from the image data given list of positions and desired areal dimensions. <a href="https://des.ncsa.illinois.edu/desaccess">DESaccess</a> also contains information regarding the catalogs and an app to locate data in a tile-based format by coordinate or tile name for direct download. Please read the <a href="[[rootPath]]terms">Terms and Conditions</a> before using these interfaces. </p>
+
+             <p>The main services can be summarized as follows:</p>
+             <p>
+               <strong>SQL web client:</strong> We provide a SQL web client that allows the user to submit asynchronous query jobs against the Oracle 12 database which contains the DES Release tables. The submitted jobs enter a queue and results can be retrieved when the job completes in one of several file formats, including CSV, FITS (<a href="http://adsabs.harvard.edu/abs/1981A%26AS...44..363W">Wells et al. 1981</a>) and HDF5 (<a href="http://www.hdfgroup.org/HDF5/">The HDF Group 1997-NNNN</a>), supporting compression in some of the cases. Big jobs are divided into smaller chunks to facilitate file transfer. This interface also provides a means to check syntax and to run shorter, synchronous jobs for quick results. The query interface is powered by <a href="https://github.com/des-labs/easyaccess">easyaccess</a>, an enhanced SQL command line interpreter designed for astronomical surveys and developed for DES.</p>
+             <p>
+               <strong>Cutout server:</strong> The cutout server allows the user to generate cutouts from the survey image data centered on a given set of positions, with areal dimensions up to 12 arcminutes on a side. Returned files may include image data cutouts in the selected bands in FITS format as well as tri-color composite images in PNG format generated using the STIFF (<a href="http://adsabs.harvard.edu/abs/2012ASPC..461..263B">Bertin 2012</a>) format or the Lupton method. The header of the cutout files is a copy from the original header from the images with extra keys indicating the center of the cutout RA_CUTOUT and DEC_CUTOUT. No stitching is performed for objects near the edge of the tile.</p>
+             <p>
+               <strong>TileFinder:</strong> A light-weight interactive tool which returns direct data tile download links matching the search query, which can be either sky RA/DEC coordinates or the explicit tile name. This service also provides access to all the processed tiles, including images and catalogs in a tile based directly from the file server.</p>
+              <p>
+                Job output files are served from a standard HTTP server to enable file transfer to remote machines. Job information and links to the generated files remain available for a limited duration, providing time to download results before clearing the space for other users.
+              </p>
+             <p>
+               The code powering DESaccess as well as the DES release site are <a href="https://github.com/des-labs">open source</a>. The DESaccess website is built HTML, JS and <a href="https://www.polymer-project.org/">LitElement from the Polymer Project</a> that provides a reusable web component framework. The DESaccess API server and job management system are written in Python and use packages including the <a href="http://www.tornadoweb.org/en/stable/">Tornado web framework</a> and the <a href="https://kubernetes.io/docs/reference/using-api/client-libraries/">Kubernetes</a> <a href="https://github.com/kubernetes-client/python/">Python API</a>. All of these applications are containerized using <a href="https://www.docker.com/">Docker</a> and run within a <a href="https://kubernetes.io/">Kubernetes cluster</a>, providing a robust system enabling high-availability services with scalable deployments and efficient resource usage.</p>
+
+            <des-img-big  src="{{rootPath}}static/images/DESaccess.png" on-tap="_dialog" data-item="3">
+            Schema for DESaccess architecture
+            </des-img-big>
+
+             <p>
+               <br/>
+             </p>
+    </div>
+</des-card>
+</template>
+<script>
+    class DesDr1NCSA extends Polymer.Element {
+      static get is() { return 'des-dr1-ncsa'; }
+      _goncsa() {
+          var win = window.open('/desaccess/', '_blank');
+          win.focus();
+      }
+      _top() {this.$.ncsa_top.scrollIntoView();}
+      _dialog(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          var temp = e.target.dataset.item;
+          this.shadowRoot.querySelector('#dialogfig'+temp).open();
+
+          }
+    }
+    window.customElements.define(DesDr1NCSA.is, DesDr1NCSA);
+  </script>
+
+</dom-module>

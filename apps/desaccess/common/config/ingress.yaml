@@ -1,0 +1,126 @@
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1beta1
+metadata:
+  name: (@= data.values.app_name @)-frontend
+  namespace: #@ data.values.namespace
+  annotations:
+    kubernetes.io/ingress.class: #@ data.values.ingress_class
+spec:
+  tls:
+  - hosts:
+    - #@ data.values.base_domain
+    secretName: #@ data.values.tls_secret
+  rules:
+  - http:
+     paths:
+     - path: #@ data.values.webroot
+       backend:
+         serviceName: (@= data.values.app_name @)-frontend
+         servicePort: #@ data.values.service_port
+    host: #@ data.values.base_domain
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1beta1
+metadata:
+  name: (@= data.values.app_name @)-backend
+  namespace: #@ data.values.namespace
+  annotations:
+    kubernetes.io/ingress.class: #@ data.values.ingress_class
+spec:
+  tls:
+  - hosts:
+    - #@ data.values.base_domain
+    secretName: #@ data.values.tls_secret
+  rules:
+  - http:
+     paths:
+     - path: #@ data.values.apiroot
+       backend:
+         serviceName: (@= data.values.app_name @)-backend
+         servicePort: #@ data.values.service_port_backend
+    host: #@ data.values.base_domain
+
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1beta1
+metadata:
+  name: (@= data.values.app_name @)-fileserver
+  namespace: #@ data.values.namespace
+  annotations:
+    kubernetes.io/ingress.class: #@ data.values.ingress_class
+spec:
+  tls:
+  - hosts:
+    - #@ data.values.base_domain
+    secretName: #@ data.values.tls_secret
+  rules:
+  - http:
+      paths:
+      - path: #@ data.values.fileroot
+        backend:
+          serviceName: (@= data.values.app_name @)-fileserver
+          servicePort: 80
+    host: #@ data.values.base_domain
+
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1beta1
+metadata:
+  name: (@= data.values.app_name @)-desaccess-docs
+  namespace: #@ data.values.namespace
+  annotations:
+    kubernetes.io/ingress.class: #@ data.values.ingress_class
+spec:
+  tls:
+  - hosts:
+    - #@ data.values.base_domain
+    secretName: #@ data.values.tls_secret
+  rules:
+  - http:
+      paths:
+      - path: (@= data.values.webroot @)/docs
+        backend:
+          serviceName: (@= data.values.app_name @)-desaccess-docs
+          servicePort: 80
+    host: #@ data.values.base_domain
+
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+  kind: Ingress
+  apiVersion: networking.k8s.io/v1beta1
+  metadata:
+    name: (@= data.values.app_name @)-email-list
+    namespace: #@ data.values.namespace
+    annotations:
+      kubernetes.io/ingress.class: #@ data.values.ingress_class
+      nginx.ingress.kubernetes.io/auth-type: basic
+      nginx.ingress.kubernetes.io/auth-secret: (@= data.values.app_name @)-email-list-auth
+      nginx.ingress.kuberentes.io/auth-realm: "Authentication Required: "
+  spec:
+    tls:
+    - hosts:
+      - #@ data.values.base_domain
+      secretName: #@ data.values.tls_secret
+    rules:
+    - http:
+        paths:
+        - path: #@ data.values.emaillistroot
+          backend:
+            serviceName: (@= data.values.app_name @)-email-list
+            servicePort: 80
+      host: #@ data.values.base_domain
+  

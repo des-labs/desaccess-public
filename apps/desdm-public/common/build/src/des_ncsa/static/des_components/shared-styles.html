@@ -1,0 +1,190 @@
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Droid+Sans|Lato:400,700|Open+Sans+Condensed:700|Open+Sans" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=News+Cycle:400,700" rel="stylesheet">
+
+<!-- shared styles for all views -->
+<dom-module id="shared-styles">
+  <template>
+    <style>
+
+    /* COLORS */
+    :root {
+        --color-button: green;
+        --color-button-hover: rebeccapurple;
+    }
+
+    /*  DES-HOME*/
+       .homeImages {
+           height: 480px;
+           width: 480px;
+           margin-top:20px;
+           outline: none;
+
+       }
+       .homeImages:focus {
+          outline: 0;
+          border: 0;
+       }
+       .homeImages:active {
+          outline: 0;
+          border: 0;
+       }
+     /* BUTTONS*/
+      .desButton:hover{
+        background: var(--color-button-hover);
+      }
+      .desButton{
+        background-color: var(--color-button);
+        color: white;
+        text-transform: none;
+        opacity: 0.6;
+      }
+      .desButton[disabled] {
+          background: #eaeaea;
+          color: #a8a8a8;
+          cursor: auto;
+          pointer-events: none;
+      }
+
+
+      .card {
+        margin: 24px;
+        padding: 16px;
+        color: #757575;
+        border-radius: 5px;
+        background-color: #fff;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      }
+
+      a{
+        color: royalblue;
+      }
+
+      .circle {
+        display: inline-block;
+        width: 64px;
+        height: 64px;
+        text-align: center;
+        color: #555;
+        border-radius: 50%;
+        background: #ddd;
+        font-size: 1.7rem;
+        line-height: 64px;
+        margin: 0 auto;
+      }
+
+
+.fixup{
+    margin-top: -84px;
+}
+.fixdown{
+    margin-top: 84px;
+}
+
+
+      h1,h2,h3,h4 {
+
+        color: #212121;
+        font-size: 1.35rem;
+        font-family:Lato,"Helvetica Neue","Comic Sans MS", Arial ,monospace;
+        font-weight: 400;
+
+      }
+
+      h5 {
+        color: black;
+        font-size: 1.1rem;
+      }
+
+
+
+      .card-content{
+        font-size: 1rem;
+        font-family: Roboto, "Helvetica Neue",serif;
+        font-weight:400;
+      }
+
+      .cc:hover{
+        background: rebeccapurple;
+      }
+      .cc{
+        background-color: red;
+        color: white;
+      }
+
+      table {
+      width:100%;
+      table-layout:auto;
+      margin: 0 auto;
+      }
+
+      table, th, td {
+      border: 2px solid white;
+      border-collapse: collapse;
+      margin: 0 auto;
+      }
+
+
+      th, td {
+      padding: 5px;
+      text-align: left;
+      word-wrap:break-word;
+      margin: 0 auto;
+      }
+
+      table tr:nth-child(even) {
+      background-color: #eee;
+      margin: 0 auto;
+      }
+
+      table tr:nth-child(odd) {
+      background-color:#fff;
+      margin: 0 auto;
+      }
+
+      table th {
+      background-color: black;
+      color: white;
+      margin: 0 auto;
+      }
+
+      .drawer-list{
+        font-size: 1.1rem;
+        font-weight:normal;
+        line-height: 24px;
+
+      }
+      .paper-bar{
+        padding-left:100px;
+        padding-top:15px;
+      }
+
+      /* App  menu styling*/
+      .selectable-content ::slotted(.app-menu-item), .app-menu-item {
+        padding:0;
+      }
+
+     #collapse ::slotted(app-menu) {
+       padding:0;
+       padding-left: 15px;
+     }
+
+    .app-menu-item{
+        font-size: 1rem;
+        font-family: Roboto, "Helvetica Neue", serif;
+        font-weight: 400;
+        background: transparent;
+      }
+
+
+      }
+      li{
+        font-size: 1rem;
+        font-family: Roboto, "Helvetica Neue", serif;
+        font-weight:400;
+        margin: 0 auto;
+      }
+
+    </style>
+  </template>
+</dom-module>

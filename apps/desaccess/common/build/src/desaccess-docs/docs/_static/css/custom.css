@@ -1,0 +1,9 @@
+@import url("theme.css");
+
+.wy-side-nav-search {
+    /* background-color: #2980b9; */
+    background-color: white;
+}
+.wy-side-nav-search > a {
+    color: black;
+}

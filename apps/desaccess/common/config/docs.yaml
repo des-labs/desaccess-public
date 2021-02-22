@@ -1,0 +1,81 @@
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: (@= data.values.app_name @)-desaccess-docs
+  namespace: #@ data.values.namespace
+spec:
+  selector:
+    matchLabels:
+      app: (@= data.values.app_name @)-desaccess-docs
+  strategy:
+    type: Recreate
+  replicas: #@ data.values.replicas
+  template:
+    metadata:
+      labels:
+        app: (@= data.values.app_name @)-desaccess-docs
+    spec:
+      imagePullSecrets:
+      - name: registry-auth
+      containers:
+      - image: (@= data.values.app_name @)-desaccess-docs
+        name: (@= data.values.app_name @)-desaccess-docs
+        imagePullPolicy: Always
+        ports:
+        - containerPort: #@ data.values.service_port
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: default.conf
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: (@= data.values.app_name @)-desaccess-docs-nginx-config
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: (@= data.values.app_name @)-desaccess-docs-nginx-config
+data:
+  default.conf: |
+    server {
+      listen       80;
+      listen  [::]:80;
+      server_name  localhost;
+
+      location (@= data.values.webroot @)/docs {
+        return 302 (@= data.values.webroot @)/docs/;
+      }
+
+      location (@= data.values.webroot @)/docs/ {
+        proxy_pass http://127.0.0.1/;  # note the trailing slash here, it matters!
+      }
+
+      location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+      }
+
+    }
+
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: (@= data.values.app_name @)-desaccess-docs
+  namespace: #@ data.values.namespace
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+  selector:
+    app: (@= data.values.app_name @)-desaccess-docs

@@ -1,0 +1,9 @@
+#@data/values
+---
+namespace: "default"
+base_domain: "example.com"
+tls_secret: "tls-certificate"
+ingress_class: nginx
+host_root_path: "/host/path/cluster-prod/namespaces/default"
+desaccess_interface: "public"
+desaccess_allowed_role_list: "default"

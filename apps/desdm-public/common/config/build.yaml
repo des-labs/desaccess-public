@@ -1,0 +1,11 @@
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+apiVersion: kbld.k14s.io/v1alpha1
+kind: Sources
+sources:
+- image: #@ data.values.app_name
+  path: ./apps/(@= data.values.app_name @)/common/build
+  docker:
+    build:
+      noCache: false

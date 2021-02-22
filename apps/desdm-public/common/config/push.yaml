@@ -1,0 +1,10 @@
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+
+#@ if/end data.values.push_images :
+---
+apiVersion: kbld.k14s.io/v1alpha1
+kind: ImageDestinations
+destinations:
+- image: #@ data.values.app_name
+  newImage: "(@= data.values.image_repo_base @)/des/(@= data.values.namespace @)-(@= data.values.app_name @)"

@@ -1,0 +1,100 @@
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: (@= data.values.app_name @)-fileserver
+  namespace: #@ data.values.namespace
+spec:
+  selector:
+    matchLabels:
+      app: (@= data.values.app_name @)-fileserver
+  strategy:
+    type: Recreate
+  replicas: #@ data.values.replicas
+  template:
+    metadata:
+      labels:
+        app: (@= data.values.app_name @)-fileserver
+    spec:
+      containers:
+      - image: nginx:1.19.0
+        name: (@= data.values.app_name @)-fileserver
+        imagePullPolicy: Always
+        ports:
+        - containerPort: #@ data.values.service_port
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html(@= data.values.fileroot @)
+          name: file-storage
+          readOnly: true
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: default.conf
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: (@= data.values.app_name @)-fileserver-nginx-config
+      - name: file-storage
+        persistentVolumeClaim:
+          claimName: (@= data.values.app_name @)-tasks
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: (@= data.values.app_name @)-fileserver-nginx-config
+data:
+  default.conf: |
+    server {
+      listen       80;
+      listen  [::]:80;
+      server_name  localhost;
+
+      location ~ ^(@= data.values.fileroot @)/.+/jupyter/public/.+/$ {
+        root   /usr/share/nginx/html;
+        autoindex on;
+        autoindex_format html;
+      }
+
+      location ~ ^(@= data.values.fileroot @)/.+/jupyter/.+/$ {
+        root   /usr/share/nginx/html;
+        autoindex off;
+      }
+
+      location ~ ^(@= data.values.fileroot @)/.+/.+/.+/json$ {
+        rewrite ^((@= data.values.fileroot @)/.+/.+/.+/)json$ $1 break;
+        root   /usr/share/nginx/html;
+        autoindex on;
+        autoindex_format jsonp;
+      }
+
+      location ~ ^(@= data.values.fileroot @)/.+/.+/.+/$ {
+        root   /usr/share/nginx/html;
+        autoindex on;
+        autoindex_format html;
+      }
+
+      location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+      }
+    }
+
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: (@= data.values.app_name @)-fileserver
+  namespace: #@ data.values.namespace
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+  selector:
+    app: (@= data.values.app_name @)-fileserver

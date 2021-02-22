@@ -1,0 +1,723 @@
+<dom-module id="des-public-main">
+  <template>
+    <style include="shared-styles">
+      :host {
+        --app-primary-color: black;
+        --app-secondary-color: black;
+        display: block;
+        --app-menu-color: #616161;
+      --app-menu-selected-bg-color: rgba(0, 0, 0, 0.00);
+      }
+
+
+      .toolbar {
+          font-family: News Cycle, Helvetica Neue,Comic Sans, Arial;
+          font-size: 2.3rem;
+          text-decoration: none;
+      }
+
+      .sublist1 {
+          padding-left: 8px;
+      }
+      .sublist2 {
+          padding-left: 25px;
+      }
+      .sublist3 {
+          padding-left: 25px;
+      }
+
+      app-drawer-layout:not([narrow]) [drawer-toggle] {
+        display: none;
+      }
+
+      app-header {
+
+        color: #fff;
+        background-color: var(--app-primary-color);
+
+      }
+
+      app-toolbar {
+        color: #fff;
+        height: 72px;
+        background-color: var(--app-primary-color);
+      }
+      app-header paper-icon-button {
+        --paper-icon-button-ink-color: purple;
+      }
+
+      .drawer-list {
+        margin-left:13px;
+      }
+
+      .drawer-list a {
+        display: block;
+        padding: 0 0 0 0;
+        text-decoration: none;
+        color: var(--app-secondary-color);
+        line-height: 40px;
+      }
+
+      .drawer-list a.iron-selected {
+        color: black;
+        font-weight: bold;
+        /*background-color : rgba(0, 0, 0, 0.05);*/
+      }
+      .drawer-list a:hover {
+        color: black;
+        font-weight: bold;
+        /*background-color : rgba(0, 0, 0, 0.05);*/
+      }
+
+      .drawer-list .app-menu-item.iron-selected {
+        color: black;
+        font-weight: bold;
+        /*background-color : rgba(0, 0, 0, 0.05);*/
+      }
+
+
+    @media only screen and (max-device-width: 1000px) {
+      .toolbar {
+          font-size: 1.8rem;
+      }
+    }
+    @media only screen and (min-width: 1000px) {
+      .smallScreen {
+          display: none;
+      }
+    }
+    @media all and (max-width: 999px) {
+    .toolbar {
+        font-size: 1.8rem;
+    }
+    .wideScreen {
+        display: none;
+        }
+        .toast-position {
+            margin-left: 12px;
+        }
+    }
+
+
+/*Firefox specific styling because app-menu styling doesn't seem to be implemented in Firefox*/
+        @-moz-document url-prefix() {
+
+            #needindent{
+                text-indent: 10px;
+                font-size: 1rem;
+                font-weight: normal;
+            }
+
+            #needindent.iron-selected{
+                color: black;
+                font-weight: bold;
+            }
+            #needindent:hover{
+                color: black;
+                font-weight: bold;
+            }
+
+
+            #needsindent2{
+                padding-left: 50px;
+                font-size: 1rem;
+                font-weight: normal;
+            }
+
+            #needsindent2.iron-selected{
+                color: black;
+                font-weight: bold;
+            }
+            #needsindent2:hover{
+                color: black;
+                font-weight: bold;
+            }
+       }
+
+    </style>
+
+    <app-location route="{{route}}" ></app-location>
+    <app-route
+        route="{{route}}"
+        pattern="[[rootPath]]:page"
+        data="{{routeData}}"
+        tail="{{subroute}}">
+    </app-route>
+    <app-route
+        route="{{subroute}}"
+        pattern="/:subpage"
+        data="{{subrouteData}}"
+        tail="{{subroute1}}">
+    </app-route>
+    <app-route
+        route="{{subroute1}}"
+        pattern="/:subpage1"
+        data="{{subrouteData1}}"
+        tail="{{subroute2}}">
+    </app-route>
+
+    <app-route
+        route="{{subroute2}}"
+        pattern="/:subpage2"
+        data="{{subrouteData2}}">
+    </app-route>
+
+
+ <app-header-layout has-scrolling-region fullbleed style="border-bottom: groove 1px">
+
+     <app-header  condenses slot="header" fixed>
+          <app-toolbar >
+            <paper-icon-button class = 'smallScreen' icon="icons:menu" on-tap="_openDrawer" ></paper-icon-button>
+              <a href="[[rootPath]]" style="text-decoration: none;color: white; padding-top:9px"><iron-image class = "wideScreen" style="width:63px; height:60px; margin-right:10px;" sizing="cover" src="{{rootPath}}static/images/DESDM_logo.png"></iron-image></a>
+            <a href="[[rootPath]]" style="text-decoration: none;color:white " ><paper-item main-title class="toolbar">DES Data Management</paper-item></a>
+
+            <!--Extra javascript needs to be added later once the site is live for the search bar to work correctly. -->
+            <!-- This is good, we can add it later when with a proper function when ready
+            <paper-search-bar class='paper-bar' placeholder="Search" hide-filter-button="True"></paper-search-bar>
+         -->
+          </app-toolbar>
+        </app-header>
+
+    <app-drawer-layout fullbleed narrow="{{narrow}}"  id="drawerLayout" responsive-width="999px"  style = "height: 80%;">
+
+      <!-- Drawer content -->
+      <app-drawer id="drawer" slot="drawer"  class="drawer-content" swipe-open="[[narrow]]" >
+           <div style="height: 100%; overflow: auto;">
+               <app-toolbar style="height: 60px;"></app-toolbar>
+          <app-menu selected="0" class="drawer-list" style="padding-left: 6px">
+
+        <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
+
+            <a  class="app-menu-item" name="home" href="[[rootPath]]home">Home</a>
+
+
+          <app-submenu no-auto-close>
+            <div  slot="submenu-trigger">
+              <a class="app-menu-item" name="releases" href="[[rootPath]]releases" >Releases<iron-icon icon="expand-more"></iron-icon></a>
+            </div>
+            <app-menu slot="submenu-content" >
+                <!--  SVA1 -->
+              <app-submenu no-auto-close>
+                <div class="sublist1" slot="submenu-trigger">
+                <a class="app-menu-item" name="sva1" href="[[rootPath]]releases/sva1">SVA1 Gold<iron-icon icon="expand-more"></iron-icon></a>
+                </div>
+
+                <app-menu class="sublist2" slot="submenu-content">
+                  <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id=needindent name="docs" href="[[rootPath]]releases/sva1/docs" persistent="False">Documentation<iron-icon icon="expand-more"></iron-icon></a>
+                </div>
+                <app-menu class="sublist3" slot="submenu-content">
+                  <a class="app-menu-item" id="needsindent2" name="docs-gold" href="[[rootPath]]releases/sva1/docs/docs-gold">Gold</a>
+                  <a class="app-menu-item" id="needsindent2" name="docs-photoz" href="[[rootPath]]releases/sva1/docs/docs-photoz" >Photoz</a>
+                  <a class="app-menu-item" id="needsindent2" name="docs-shear" href="[[rootPath]]releases/sva1/docs/docs-shear" >Shear</a>
+                  <a class="app-menu-item" id="needsindent2" name="docs-redmapper" href="[[rootPath]]releases/sva1/docs/docs-redmapper" >RedMaPPer</a>
+                  <a class="app-menu-item" id="needsindent2" name="docs-svmaps" href="[[rootPath]]releases/sva1/docs/docs-svmaps" >Mass Maps</a>
+                </app-menu>
+                </app-submenu>
+
+                  <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id="needindent" name="file-content" href="[[rootPath]]releases/sva1/file-content">Files</a>
+                </div>
+                </app-submenu>
+
+                </app-menu>
+
+              </app-submenu>
+
+              <!-- Y1 -->
+              <app-submenu no-auto-close>
+                <div class="sublist1" slot="submenu-trigger">
+                <a class="app-menu-item" name="y1a1" href="[[rootPath]]releases/y1a1">Y1 Gold<iron-icon icon="expand-more"></iron-icon></a>
+                </div>
+
+                <app-menu class="sublist2" slot="submenu-content">
+
+                  <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id=needindent name="gold" href="[[rootPath]]releases/y1a1/gold" persistent="False">Gold Products<iron-icon icon="expand-more"></iron-icon></a>
+                </div>
+                <app-menu class="sublist3" slot="submenu-content">
+                  <a class="app-menu-item" id="needsindent2" name="morphology" href="[[rootPath]]releases/y1a1/gold/morphology">Morphology</a>
+                  <a class="app-menu-item" id="needsindent2" name="classification" href="[[rootPath]]releases/y1a1/gold/classification">Star-Galaxy</a>
+                  <a class="app-menu-item" id="needsindent2" name="footprint" href="[[rootPath]]releases/y1a1/gold/footprint">Footprint/Depth</a>
+                  <a class="app-menu-item" id="needsindent2" name="systematics" href="[[rootPath]]releases/y1a1/gold/systematics"><span style="font-size: 0.95rem;">Observing Conditions</span></a>
+                </app-menu>
+                </app-submenu>
+
+
+                  <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id=needindent name="key-catalogs" href="[[rootPath]]releases/y1a1/key-catalogs" persistent="False">Y1KP Catalogs<iron-icon icon="expand-more"></iron-icon></a>
+                </div>
+                <app-menu class="sublist3" slot="submenu-content">
+                  <a class="app-menu-item" id="needsindent2" name="key-mof" href="[[rootPath]]releases/y1a1/key-catalogs/key-mof">MOF Catalogs</a>
+                  <a class="app-menu-item" id="needsindent2" name="key-psf" href="[[rootPath]]releases/y1a1/key-catalogs/key-psf">PSF Catalogs</a>
+                  <a class="app-menu-item" id="needsindent2" name="key-shape" href="[[rootPath]]releases/y1a1/key-catalogs/key-shape">Shape Catalogs</a>
+                  <a class="app-menu-item" id="needsindent2" name="key-photoz" href="[[rootPath]]releases/y1a1/key-catalogs/key-photoz">Photo-z Catalogs</a>
+                  <a class="app-menu-item" id="needsindent2" name="key-redmagic" href="[[rootPath]]releases/y1a1/key-catalogs/key-redmagic">redMaGiC Catalogs</a>
+                  <a class="app-menu-item" id="needsindent2" name="key-redmapper" href="[[rootPath]]releases/y1a1/key-catalogs/key-redmapper">redMaPPer Catalogs</a>
+                </app-menu>
+                </app-submenu>
+
+
+                  <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id="needindent" name="key-products" href="[[rootPath]]releases/y1a1/key-products">Y1KP Products</a>
+                </div>
+                </app-submenu>
+
+                  <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id="needindent" name="bao" href="[[rootPath]]releases/y1a1/bao">BAO Products</a>
+                </div>
+                </app-submenu>
+
+                  <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id="needindent" name="density" href="[[rootPath]]releases/y1a1/density">Y1 Density Split</a>
+                </div>
+                </app-submenu>
+                
+                <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id="needindent" name="voids" href="[[rootPath]]releases/y1a1/voids">Y1 Voids</a>
+                </div>
+                </app-submenu>
+                
+                <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id="needindent" name="voids" href="[[rootPath]]releases/y1a1/photoz">Y1 Photo-z</a>
+                </div>
+                </app-submenu>
+
+                  <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id="needindent" name="file-content" href="http://desdr-server.ncsa.illinois.edu/despublic/y1a1_files/" target="_blank">Files</a>
+                </div>
+                </app-submenu>
+
+                </app-menu>
+
+              </app-submenu>
+
+
+              <!-- SN -->
+
+              <app-submenu no-auto-close>
+                <div class="sublist1" slot="submenu-trigger">
+                <a class="app-menu-item" name="sn" href="[[rootPath]]releases/sn">SN Products<iron-icon icon="expand-more"></iron-icon></a>
+                </div>
+
+                <app-menu class="sublist2" slot="submenu-content">
+
+                  <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id="needindent" name="file-content" href="http://desdr-server.ncsa.illinois.edu/despublic/sn_files/y3" target="_blank">Files</a>
+                </div>
+                </app-submenu>
+
+                </app-menu>
+
+              </app-submenu>
+
+
+              <!-- DR1 -->
+
+
+               <app-submenu no-auto-close>
+                <div class="sublist1" slot="submenu-trigger">
+                  <a class="app-menu-item" name="dr1" href="[[rootPath]]releases/dr1">DR1<iron-icon icon="expand-more"></iron-icon></a>
+                </div>
+                <app-menu class="sublist2" slot="submenu-content">
+                   <!--<a class="app-menu-item" id=needindent name="dr1files" href="[[rootPath]]releases/dr1/dr1files" >Files</a>-->
+                  <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id=needindent name="dr1-docs" href="[[rootPath]]releases/dr1/dr1-docs" persistent="False">Overview<iron-icon icon="expand-more"></iron-icon></a>
+                </div>
+                <app-menu class="sublist3" slot="submenu-content">
+                  <a class="app-menu-item" id=needsindent2 name="acquisition" href="[[rootPath]]releases/dr1/dr1-docs/acquisition" >Data Acquisition</a>
+                  <a class="app-menu-item" id=needsindent2 name="processing" href="[[rootPath]]releases/dr1/dr1-docs/processing" >Processing</a>
+                  <a class="app-menu-item" id=needsindent2 name="quality" href="[[rootPath]]releases/dr1/dr1-docs/quality" >Data Quality</a>
+                  <a class="app-menu-item" id=needsindent2 name="known-issues" href="[[rootPath]]releases/dr1/dr1-docs/known-issues" >Known Issues</a>
+                </app-menu>
+                </app-submenu>
+
+                  <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id=needindent name="dr1-products" href="[[rootPath]]releases/dr1/dr1-products" persistent="False">Products<iron-icon icon="expand-more"></iron-icon></a>
+                </div>
+                <app-menu class="sublist3" slot="submenu-content">
+                  <a class="app-menu-item" id=needsindent2 name="dr1-schema" href="[[rootPath]]releases/dr1/dr1-products/dr1-schema" >Table Schema</a>
+                </app-menu>
+                </app-submenu>
+
+                  <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id=needindent name="dr1-access" href="[[rootPath]]releases/dr1/dr1-access" persistent="False">Data Access<iron-icon icon="expand-more"></iron-icon></a>
+                </div>
+                <app-menu class="sublist3" slot="submenu-content">
+                  <a class="app-menu-item" id=needsindent2 name="dr1-ncsa" href="[[rootPath]]releases/dr1/dr1-access/dr1-ncsa" >NCSA DESaccess</a>
+                  <a class="app-menu-item" id=needsindent2 name="dr1-linea" href="[[rootPath]]releases/dr1/dr1-access/dr1-linea" >LIneA Science Server</a>
+                  <a class="app-menu-item" id=needsindent2 name="dr1-noao" href="[[rootPath]]releases/dr1/dr1-access/dr1-noao" >NOAO DataLab</a>
+                </app-menu>
+                </app-submenu>
+
+                  <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id=needindent name="dr1-faq" href="[[rootPath]]releases/dr1/dr1-faq" >Data Release FAQ</a>
+                </div>
+                </app-submenu>
+                  <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id=needindent name="dr1-team" href="[[rootPath]]releases/dr1/dr1-team" >DR1 Release Team</a>
+                </div>
+                </app-submenu>
+
+
+                </app-menu>
+               </app-submenu no-auto-close>
+
+
+              <!-- DR2 -->
+               <app-submenu no-auto-close>
+                <div class="sublist1" slot="submenu-trigger">
+                  <a class="app-menu-item" name="dr2" href="[[rootPath]]releases/dr2">DR2<iron-icon icon="expand-more"></iron-icon></a>
+                </div>
+                <app-menu class="sublist2" slot="submenu-content">
+                   <!--<a class="app-menu-item" id=needindent name="dr1files" href="[[rootPath]]releases/dr1/dr1files" >Files</a>-->
+                  <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id=needindent name="dr2-docs" href="[[rootPath]]releases/dr2/dr2-docs" persistent="False">Overview<iron-icon icon="expand-more"></iron-icon></a>
+                </div>
+                <app-menu class="sublist3" slot="submenu-content">
+                  <a class="app-menu-item" id=needsindent2 name="dr2-processing" href="[[rootPath]]releases/dr2/dr2-docs/dr2-processing" >Processing</a>
+                  <a class="app-menu-item" id=needsindent2 name="known-issues" href="[[rootPath]]releases/dr2/dr2-docs/known-issues" >Known Issues</a>
+                  <a class="app-menu-item" id=needsindent2 name="dr2-transformations" href="[[rootPath]]releases/dr2/dr2-docs/dr2-transformations" >Photometric Transformations</a>
+                </app-menu>
+                </app-submenu>
+
+                  <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id=needindent name="dr2-products" href="[[rootPath]]releases/dr2/dr2-products" persistent="False">Products<iron-icon icon="expand-more"></iron-icon></a>
+                </div>
+                <app-menu class="sublist3" slot="submenu-content">
+                  <a class="app-menu-item" id=needsindent2 name="dr2-schema" href="[[rootPath]]releases/dr2/dr2-products/dr2-schema" >Table Schema</a>
+                </app-menu>
+                </app-submenu>
+
+                  <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id=needindent name="dr2-access" href="[[rootPath]]releases/dr2/dr2-access" persistent="False">Data Access</a>
+                </div>
+                </app-submenu>
+
+                  <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id=needindent name="dr2-faq" href="[[rootPath]]releases/dr2/dr2-faq" >Data Release FAQ</a>
+                </div>
+                </app-submenu>
+
+
+                </app-menu>
+               </app-submenu no-auto-close>
+
+              <!-- OTHERS -->
+              <app-submenu no-auto-close>
+                <div class="sublist1" slot="submenu-trigger">
+                <a class="app-menu-item" name="other" href="[[rootPath]]releases/other">Other<iron-icon icon="expand-more"></iron-icon></a>
+                </div>
+
+                <app-menu class="sublist2" slot="submenu-content">
+
+
+                  <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id="needindent" name="paper-data" href="[[rootPath]]releases/other/paper-data">Ancillary paper data</a>
+                </div>
+                </app-submenu>
+
+                  <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id="needindent" name="y3-rrl" href="[[rootPath]]releases/other/y3-rrl" >Y3 RR Lyrae</a>
+                </div>
+                </app-submenu>
+
+                  <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id="needindent" name="y3-mlt" href="[[rootPath]]releases/other/y3-mlt">Y3 LT,M dwarfs</a>
+                </div>
+                </app-submenu>
+
+
+                  <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id="needindent" name="y3-lt-widebinaries" href="[[rootPath]]releases/other/y3-lt-widebinaries">Y3 LT WideBinaries</a>
+                </div>
+                </app-submenu>
+                
+                
+                <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id="needindent" name="y3-lsbg" href="[[rootPath]]releases/other/y3-lsbg">Y3 LSBG</a>
+                </div>
+                </app-submenu>
+                
+                <app-submenu no-auto-close>
+                <div class="app-menu-item" slot="submenu-trigger">
+                  <a class="app-menu-item" id="needindent" name="y6-rrl" href="[[rootPath]]releases/other/y6-rrl" >Y6 RR Lyrae</a>
+                </div>
+                </app-submenu>
+
+                </app-menu>
+
+
+              </app-submenu>
+
+
+
+                <!-- <div class="sublist1" >
+               <a class ="app-menu-item" disabled>Y1A1 Gold</a>
+                </div> -->
+            </app-menu>
+          </app-submenu>
+
+
+          <a class="app-menu-item" name="help" href="[[rootPath]]help">Get Help</a>
+          <a class="app-menu-item" name="thanks" href="[[rootPath]]thanks">Acknowledgements</a>
+          <a class ="app-menu-item" name="about" href="[[rootPath]]about" on-tap="">About Us</a>
+        </iron-selector>
+      </app-menu>
+           </div>
+     </app-drawer>
+
+        <iron-pages style="margin-top: 72px;border-left: groove 1px;padding-left: 8px; padding-right: 8px"
+            selected="[[page]]"
+            attr-for-selected="name"
+            fallback-selection="view404"
+            role="main"
+         >
+          <des-home name="home"></des-home>
+          <des-releases name="releases"></des-releases>
+          <!-- SVA1 pages -->
+              <des-sva1 name="sva1"></des-sva1>
+              <des-file-content name="file-content"></des-file-content>
+              <des-docs name="docs"></des-docs>
+              <des-docs-gold name="docs-gold"></des-docs-gold>
+              <des-docs-photoz name="docs-photoz"></des-docs-photoz>
+              <des-docs-shear name="docs-shear"></des-docs-shear>
+              <des-docs-redmapper name="docs-redmapper"></des-docs-redmapper>
+              <des-docs-svmaps name="docs-svmaps"></des-docs-svmaps>
+          <!-- Y1A1 pages -->
+              <des-y1a1 name="y1a1"></des-y1a1>
+              <des-y1a1-gold name="gold"></des-y1a1-gold>
+                <des-y1a1-gold-morphology name="morphology"></des-y1a1-gold-morphology>
+                <des-y1a1-gold-classification name="classification"></des-y1a1-gold-classification>
+                <des-y1a1-gold-footprint name="footprint"></des-y1a1-gold-footprint>
+                <des-y1a1-gold-systematics name="systematics"></des-y1a1-gold-systematics>
+              <des-y1a1-key-catalogs name="key-catalogs"></des-y1a1-key-catalogs>
+                <des-y1a1-key-mof name="key-mof"></des-y1a1-key-mof>
+                <des-y1a1-key-psf name="key-psf"></des-y1a1-key-psf>
+                <des-y1a1-key-shape name="key-shape"></des-y1a1-key-shape>
+                <des-y1a1-key-photoz name="key-photoz"></des-y1a1-key-photoz>
+                <des-y1a1-key-redmagic name="key-redmagic"></des-y1a1-key-redmagic>
+                <des-y1a1-key-redmapper name="key-redmapper"></des-y1a1-key-redmapper>
+              <des-y1a1-bao name="bao"></des-y1a1-bao>
+              <des-y1a1-density name="density"></des-y1a1-density>
+              <des-y1a1-voids name="voids"></des-y1a1-voids>
+              <des-y1a1-photoz name="photoz"></des-y1a1-photoz>
+              <des-y1a1-key-products name="key-products"></des-y1a1-key-products>
+          <!-- SN PAGES -->
+              <des-sn name="sn"></des-sn>
+
+          <!-- DR1 PAGES -->
+            <des-dr1 name="dr1"></des-dr1>
+            <des-dr1docs name="dr1-docs"></des-dr1docs>
+            <des-dr1-products name="dr1-products"></des-dr1-products>
+            <des-dr1-schema name="dr1-schema"></des-dr1-schema>
+            <des-dr1-soft name="processing"></des-dr1-soft>
+            <des-dr1-observing name="acquisition"></des-dr1-observing>
+            <des-dr1-quality name="quality"></des-dr1-quality>
+            <des-dr1-known-issues name="known-issues"></des-dr1-known-issues>
+            <des-dr1-access name="dr1-access"></des-dr1-access>
+            <des-dr1-ncsa name="dr1-ncsa"></des-dr1-ncsa>
+            <des-dr1-noao name="dr1-noao"></des-dr1-noao>
+            <des-dr1-linea name="dr1-linea"></des-dr1-linea>
+            <des-dr1-faq name="dr1-faq"></des-dr1-faq>
+            <des-dr1-team name="dr1-team"></des-dr1-team>
+          
+           <!-- DR2 PAGES -->
+
+            <des-dr2 name="dr2"></des-dr2>
+            <des-dr2docs name="dr2-docs"></des-dr2docs>
+            <des-dr2-products name="dr2-products"></des-dr2-products>
+            <des-dr2-schema name="dr2-schema"></des-dr2-schema>
+            <des-dr2-access name="dr2-access"></des-dr2-access>
+            <des-dr2-soft name="dr2-processing"></des-dr2-soft>
+            <des-dr2-transformations name="dr2-transformations"></des-dr2-transformations>
+            <!-- FAQ and NCSA access are common for DR1 and DR2-->
+            <des-dr1-faq name="dr2-faq"></des-dr1-faq>
+            <des-dr1-ncsa name="dr2-ncsa"></des-dr1-ncsa>
+
+           <!-- Other Releases -->
+              <des-other name="other"></des-other>
+              <des-y3-rrl name="y3-rrl"></des-y3-rrl>
+              <des-y3-mlt name="y3-mlt"></des-y3-mlt>
+              <des-y3-lt-widebinaries name="y3-lt-widebinaries"></des-y3-lt-widebinaries>
+              <des-y3-lsbg name="y3-lsbg"></des-y3-lsbg>
+              <des-y6-rrl name="y6-rrl"></des-y6-rrl>
+              <des-paper-data name="paper-data"></des-paper-data>
+
+          <!-- Other pages -->
+          <des-help name="help"></des-help>
+          <des-thankyou name="thanks"></des-thankyou>
+          <des-terms name="terms"></des-terms>
+          <des-about name="about"></des-about>
+          <des-easyweb name="easyweb"></des-easyweb>
+          <des-limited name="limited"></des-limited>
+          <des-view404 name="view404"></des-view404>
+        </iron-pages>
+
+        <des-supported></des-supported>
+
+      <!-- Main content -->
+
+
+
+
+    </app-drawer-layout>
+  </app-header-layout>
+
+  </template>
+
+  <script>
+    class DesPublic extends Polymer.Element {
+      ready() { 
+        super.ready();
+        let pageHierarchy = window.location.pathname.substr(window.location.pathname.search(this.rootPath)+1).split('/');
+        for (let pg in pageHierarchy) {
+          if (this.shadowRoot.querySelector('a[name='+pageHierarchy[pg]+']') !== null) {
+            console.log('clicking page')
+            this.shadowRoot.querySelector('a[name='+pageHierarchy[pg]+']').click();
+          }
+        }
+       }
+      static get is() { return 'des-public-main'; }
+      static get properties() {
+        return {
+          page: {
+            type: String,
+            reflectToAttribute: true,
+            observer: '_pageChanged'
+          },
+          subpage: {
+            type: String,
+            reflectToAttribute: true,
+          },
+          subpage1: {
+            type: String,
+            reflectToAttribute: true,
+          },
+          subpage2: {
+            type: String,
+            reflectToAttribute: true,
+          },
+          routeData: Object,
+          subrouteData: Object,
+          subroute: String,
+          subrouteData1: Object,
+          subroute1: String,
+          subrouteData2:Object,
+          subroute2:String,
+          rootPath: String
+        };
+      }
+
+
+      static get observers() {
+        return [
+          '_routePageChanged(routeData.page)',
+          '_routeSubPageChanged(subrouteData.subpage)',
+          '_routeSubPage1Changed(subrouteData1.subpage1)',
+          '_routeSubPage2Changed(subrouteData2.subpage2)'
+        ];
+      }
+
+
+      _routePageChanged(page) {
+        var drawerLayout = document.getElementById('drawerLayout');
+        this.page = page || 'home';
+        //this.subpage = (function () { return; })()  ;
+        //this.subrouteData.subpage = (function () { return; })()  ;
+        console.log('page:' + page);
+        // Close a non-persistent drawer when the page & route are changed.
+        //if (!this.$.drawer.persistent &&  drawerLayout.not([narrow]))  {
+          //this.$.drawer.close();
+        //}
+      }
+      _routeSubPageChanged(subpage) {
+        //this.subpage = subpage || '';
+        this.routeData.page = subpage;
+        //this.subpage = (function () { return; })()  ;
+        //this.subrouteData.subpage = (function () { return; })()  ;
+        console.log('subpage:' + subpage);
+        // Close a non-persistent drawer when the page & route are changed.
+        //if (!this.$.drawer.persistent) {
+          //this.$.drawer.close();
+        //}
+      }
+      _routeSubPage1Changed(subpage1) {
+        //this.subpage = subpage || '';
+        this.routeData.page = subpage1;
+        this.subrouteData.subpage = subpage1;
+        //this.subpage = (function () { return; })()  ;
+        //this.subrouteData.subpage = (function () { return; })()  ;
+        console.log('subpage1:' + subpage1);
+        // Close a non-persistent drawer when the page & route are changed.
+        //if (!this.$.drawer.persistent ) {
+          //this.$.drawer.close();
+        //}
+      }
+
+      _routeSubPage2Changed(subpage2) {
+        //this.subpage = subpage || '';
+        this.routeData.page = subpage2;
+        this.subrouteData1.subpage1 = subpage2;
+        //this.subpage = (function () { return; })()  ;
+        //this.subrouteData.subpage = (function () { return; })()  ;
+        console.log('subpage2:' + subpage2);
+        // Close a non-persistent drawer when the page & route are changed.
+        // if (!this.$.drawer.persistent) {
+          //this.$.drawer.close();
+        //}
+      }
+
+      _pageChanged(page,subpage) {
+        // Load page import on demand. Show 404 page if fails
+        var resolvedPageUrl = this.resolveUrl('des-' + page + '.html');
+        //this.subpage = (function () { return; })()  ;
+        //this.subrouteData.subpage = (function () { return; })()  ;
+        /*Polymer.importHref(
+            resolvedPageUrl,
+            null,
+            this._showPage404.bind(this),
+            true);*/
+
+      }
+      _showPage404() {
+        this.page = 'view404';
+      }
+      _openDrawer(){
+          this.$.drawer.toggle();
+        }
+
+    }
+
+
+    window.customElements.define(DesPublic.is, DesPublic);
+
+
+  </script>
+
+</dom-module>

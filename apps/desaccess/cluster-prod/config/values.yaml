@@ -1,0 +1,10 @@
+#@data/values
+---
+
+drop_tables: "false"
+webroot: "/desaccess"
+npm_build: "build"
+apiroot: "/desaccess/api"
+fileroot: "/files-desaccess"
+emaillistroot: "/email-list"
+replicas: 3

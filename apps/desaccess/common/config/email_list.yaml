@@ -1,0 +1,75 @@
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: (@= data.values.app_name @)-email-list
+  namespace: #@ data.values.namespace
+spec:
+  selector:
+    matchLabels:
+      app: (@= data.values.app_name @)-email-list
+  strategy:
+    type: Recreate
+  replicas: #@ data.values.replicas
+  template:
+    metadata:
+      labels:
+        app: (@= data.values.app_name @)-email-list
+    spec:
+      containers:
+      - image: nginx:1.19.0
+        name: (@= data.values.app_name @)-email-list
+        imagePullPolicy: Always
+        ports:
+        - containerPort: #@ data.values.service_port
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html(@= data.values.emaillistroot @)
+          name: file-storage
+          readOnly: true
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: default.conf
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: (@= data.values.app_name @)-email-list-nginx-config
+      - name: file-storage
+        persistentVolumeClaim:
+          claimName: (@= data.values.app_name @)-email
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: (@= data.values.app_name @)-email-list-nginx-config
+data:
+  default.conf: |
+    server {
+      listen       80;
+      listen  [::]:80;
+      server_name  localhost;
+
+      location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+      }
+    }
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: (@= data.values.app_name @)-email-list
+  namespace: #@ data.values.namespace
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+  selector:
+    app: (@= data.values.app_name @)-email-list

@@ -1,0 +1,447 @@
+openapi: 3.0.1
+info:
+  title: DESaccess API
+  description: 'DESaccess API provides a RESTful interface to access Dark Energy Survey data. ([Return to docs.](..))'
+  version: 3.2.0
+servers:
+- url: https://des.ncsa.illinois.edu/desaccess/api
+  description: Interface for the general public
+- url: https://deslabs.ncsa.illinois.edu/desaccess/api
+  description: Interface for the DES collaboration
+tags:
+- name: Authentication
+- name: Jobs
+  description: Manage **Cutout Service** and **Database Query** jobs
+paths:
+  /login:
+    post:
+      tags:
+      - Authentication
+      summary: Authenticate using DES account to obtain an access token
+      operationId: login
+      requestBody:
+        description:  >-
+          DES account credentials and target database
+          Example (cURL):
+      
+              curl \
+                  -X POST \
+                  -H "Accept: application/json" \
+                  -d '{"username": "jsmith", "password": "***", "database": "desdr"}' \
+                  https://des.ncsa.illinois.edu/desaccess/api/login 
+
+      
+        content:
+          application/json:
+            schema:
+              required:
+              - database
+              - password
+              - username
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "jsmith"
+                password:
+                  type: string
+                  example: "*****"
+                database:
+                  type: string
+                  example: "desdr"
+        required: false
+      responses:
+        200:
+          description: Successful authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: Auth token
+                    example: "eyJ0eXAiOiJK...V1QiLCJhbGciOiJIU"
+                  db:
+                    type: string
+                    description: Name of active database
+                    example: "desdr"
+                  email:
+                    type: string
+                    description: User's email address
+                    example: "jsmith@example.com"
+                  lastname:
+                    type: string
+                    description: User's family name
+                    example: "Smith"
+                  name:
+                    type: string
+                    description: User's given name
+                    example: "John"
+                  roles:
+                    type: array
+                    description: Roles assigned to user account
+                    items:
+                      type: string
+                      example: "default"
+                  preferences:
+                    type: object
+                    properties: {}
+                    description: User preferences
+        401:
+          description: Invalid username/password supplied
+          content: {}
+      x-codegen-request-body-name: body
+  /logout:
+    post:
+      security:
+      - bearerAuth: []
+      tags:
+      - Authentication
+      summary: End authenticated session.
+      operationId: logout
+      responses:
+        200:
+          description: OK
+          content: {}
+  /job/query:
+    put:
+      security:
+      - bearerAuth: []
+      tags:
+      - Jobs
+      summary: Submit a new query job request
+      operationId: query
+      requestBody:
+        description: Query job specification
+        content:
+          application/json:
+            schema:
+              required:
+              - filename
+              - query
+              type: object
+              properties:
+                query:
+                  type: string
+                  description: Oracle database query to be executed
+                  example: "SELECT id FROM table_name WHERE ..."
+                filename:
+                  type: string
+                  description: Name of the file containing the query results
+                  example: "results.csv"
+        required: false
+      responses:
+        200:
+          description: Job submission status and ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewJob'
+      x-codegen-request-body-name: spec
+  /job/cutout:
+    put:
+      security:
+      - bearerAuth: []
+      tags:
+      - Jobs
+      summary: Submit a new cutout job request
+      operationId: cutout
+      requestBody:
+        description: Cutout job specification
+        content:
+          application/json:
+            schema:
+              required:
+              - positions
+              type: object
+              properties:
+                positions:
+                  type: string
+                  description: CSV-formatted table of positions, specified in each row either by RA/DEC coordinates or Coadd IDs. (Refer to cutout service documentation for optional per-position configuration parameters.)
+                  example: "RA,DEC\n29.562019000000,-63.902864000000\n29.604203000000,-63.900322000000\n30.572807000000,-63.897566000000\n"
+                xsize:
+                  type: number
+                  description: Size in arcminutes of the cutout x-axis. Default 1.0.
+                  format: float
+                  example: 1.1
+                ysize:
+                  type: number
+                  description: Size in arcminutes of the cutout y-axis. Default 1.0.
+                  format: float
+                  example: 1.1
+                make_fits:
+                  type: boolean
+                  description: Generate cutout data files in FITS format
+                  example: true
+                colors_fits:
+                  type: string
+                  description: Color bands to output (string value containing characters from the set 'grizy')
+                  example: "grizy"
+                discard_fits_files:
+                  type: boolean
+                  description: Discard FITS files that are only created in order to produce requested RGB images. FITS files that are explicitly requested are retained.
+                  example: false
+                make_rgb_stiff:
+                  type: boolean
+                  description: Generate cutout data files in RGB color using STIFF format
+                  example: true
+                make_rgb_lupton:
+                  type: boolean
+                  description: Generate cutout data files in RGB color using the Lupton method
+                  example: true
+                rgb_stiff_colors:
+                  type: string
+                  description: 'Sets of color band triplets, delineated by semi-colons, denoting by letter ordering the bands to use for Red, Green, Blue in the generated RGB images in STIFF format. Example: "gri;zgi" will produce two RGB images with Red/Green/Blue using bands G/R/I and Z/G/I, respectively.'
+                  example: "gri;rig;zgi"
+                rgb_lupton_colors:
+                  type: string
+                  description: 'Sets of color band triplets, delineated by semi-colons, denoting by letter ordering the bands to use for Red, Green, Blue in the generated RGB images in Lupton format. Example: "gri;zgi" will produce two RGB images with Red/Green/Blue using bands G/R/I and Z/G/I, respectively.'
+                  example: "gri;rig;zgi"
+                rgb_minimum:
+                  type: number
+                  description: 'Lupton RGB Parameter: the black point for the 3-color image'
+                  format: float
+                  example: 1.1
+                rgb_stretch:
+                  type: number
+                  description: 'Lupton RGB Parameter: the linear stretch of the image'
+                  format: float
+                  example: 50.1
+                rgb_asinh:
+                  type: number
+                  description: 'Lupton RGB Parameter: the asinh softening parameter'
+                  format: float
+                  example: 10.1
+        required: true
+      responses:
+        200:
+          description: Job submission status and ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewJob'
+      x-codegen-request-body-name: spec
+  /job/status:
+    post:
+      security:
+      - bearerAuth: []
+      tags:
+      - Jobs
+      summary: Request status of existing job(s)
+      operationId: status
+      parameters:
+      - name: job-id
+        in: query
+        description: Either a specific job ID or the string "all" to get info about
+          all user jobs
+        schema:
+          type: string
+        example: 25f4d3bacae04a59aee7847af82c5012
+      responses:
+        200:
+          description: Job status and information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobStatus'
+  /job/list:
+    get:
+      security:
+      - bearerAuth: []
+      tags:
+      - Jobs
+      summary: Fetch list of basic info for all jobs
+      operationId: list
+      responses:
+        200:
+          description: List of basic job information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobList'
+  /job/delete:
+    delete:
+      security:
+      - bearerAuth: []
+      tags:
+      - Jobs
+      summary: Delete a job and all associated files
+      operationId: delete
+      parameters:
+      - name: job-id
+        in: query
+        description: Universally unique identifier of job to be deleted
+        schema:
+          type: string
+        example: 25f4d3bacae04a59aee7847af82c5012
+        required: true
+      responses:
+        200:
+          description: Status of job deletion
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteJob'
+      x-codegen-request-body-name: jobids
+components:
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    # optional, arbitrary value for documentation purposes
+  schemas:
+    NewJob:
+      type: object
+      properties:
+        new_token:
+          type: string
+          description: Fresh auth token
+          example: "eyJ0eXAiOiJK...V1QiLCJhbGciOiJIU"
+        jobid:
+          type: string
+          description: New job UUID (universally unique identifier)
+          example: 25f4d3bacae04a59aee7847af82c5012
+        status:
+          type: string
+          description: Status of job submission
+          example: ok
+        message:
+          type: string
+          description: Details about submission status
+          example: ""
+    DeleteJob:
+      type: object
+      properties:
+        new_token:
+          type: string
+          description: Fresh auth token
+          example: "eyJ0eXAiOiJK...V1QiLCJhbGciOiJIU"
+        status:
+          type: string
+          description: Status of job deletion
+          example: ok
+        message:
+          type: string
+          description: Details about deletion status
+          example: ""
+    JobList:
+      type: object
+      properties:
+        new_token:
+          type: string
+          description: Fresh auth token
+          example: "eyJ0eXAiOiJK...V1QiLCJhbGciOiJIU"
+        status:
+          type: string
+          description: Status of job status request
+          example: ok
+        message:
+          type: string
+          description: Details about submission status
+          example: ""
+        jobs:
+          type: array
+          description: Array of jobs and basic information
+          items:
+            type: object
+            properties:
+              job_type:
+                type: string
+                description: Type of job (e.g. "query" or "cutout")
+                example: cutout
+              job_name:
+                type: string
+                description: Name associated with job. Not in general unique.
+                example: cutout-f29a011f42dd4d80bb66da110711c66f-jsmith
+              job_id:
+                type: string
+                description: Universally unique identifier of job
+                example: f29a011f42dd4d80bb66da110711c66f
+              job_status:
+                type: string
+                description: State of submitted job
+                example: "success"
+    JobStatus:
+      type: object
+      properties:
+        new_token:
+          type: string
+          description: Fresh auth token
+          example: "eyJ0eXAiOiJK...V1QiLCJhbGciOiJIU"
+        status:
+          type: string
+          description: Status of job status request
+          example: ok
+        message:
+          type: string
+          description: Details about submission status
+          example: ""
+        jobs:
+          type: array
+          description: Array of jobs and information about them including their status
+          items:
+            type: object
+            properties:
+              job_type:
+                type: string
+                description: Type of job (e.g. "query" or "cutout")
+                example: cutout
+              job_name:
+                type: string
+                description: Name associated with job. Not in general unique.
+                example: cutout-f29a011f42dd4d80bb66da110711c66f-jsmith
+              job_id:
+                type: string
+                description: Universally unique identifier of job
+                example: f29a011f42dd4d80bb66da110711c66f
+              job_status:
+                type: string
+                description: State of submitted job
+                example: "success"
+              job_status_message:
+                type: string
+                description: Additional info associated with the job status
+                example: ""
+              job_time_start:
+                type: string
+                description: Date and time job was started
+                example: "2020-09-22 18:27:27"
+              job_time_complete:
+                type: string
+                description: Date and time job was completed
+                example: "2020-09-22 18:27:27"
+              job_time_submitted:
+                type: string
+                description: Date and time job was submitted
+                example: "2020-09-22 18:27:27"
+              data:
+                type: object
+                properties: {}
+                description: Results of quick query
+                example: {}
+              query:
+                type: string
+                description: Database query executed
+                example: "SELECT RA, DEC, MAG_AUTO_G, TILENAME from Y3_GOLD_2_2 sample(0.001)"
+              query_files:
+                type: array
+                description: List of generated query result files
+                items:
+                  type: string
+                  example: "results.csv"
+              cutout_files:
+                type: array
+                description: List of generated cutout files
+                items:
+                  type: string
+                  example: "f29a011f42dd4d80bb66da110711c66f/DES0159-6414/DESJ015825.0087-635401.1592_g.fits"
+              cutout_positions:
+                type: string
+                description: CSV-formatted table of submitted cutout positions
+                example: 
+                  "RA,DEC\n29.562019000000,-63.902864000000\n29.604203000000,-63.900322000000\n30.572807000000,-63.897566000000\n"
+              cutout_summary:
+                type: object
+                description: Object with input and processed job options and the detailed output for each cutout
+                example: {}

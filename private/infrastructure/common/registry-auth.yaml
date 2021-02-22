@@ -1,0 +1,9 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: registry-auth
+data:
+  .dockerconfigjson: ewo...Qp9
+type: kubernetes.io/dockerconfigjson

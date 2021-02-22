@@ -1,0 +1,54 @@
+version: '3.1'
+
+networks:
+  desaccess-net:
+    external: false
+
+services:
+  frontend:
+    container_name: desaccess-frontend
+    image: desaccess-frontend
+    build:
+      context: .
+      dockerfile: Dockerfile-frontend
+    env_file: .env
+    restart: always
+    depends_on:
+    - backend
+    - mysql
+    ports:
+    - "8080:8080"
+    networks:
+    - desaccess-net
+    volumes:
+    - "./src/des-gateway:/srv"
+
+  backend:
+    container_name: desaccess-backend
+    image: desaccess-backend
+    build:
+      context: .
+      dockerfile: Dockerfile-backend
+      args:
+        - UID
+    env_file: .env
+    restart: always
+    depends_on:
+    - mysql
+    ports:
+    - "8888:8888"
+    networks:
+    - desaccess-net
+    volumes:
+    - "./src/des-jobhandler:/home/des"
+
+  mysql:
+    container_name: desaccess-mysql
+    # mysql:8 and above will fail due to "Authentication plugin 'caching_sha2_password' is not supported"
+    image: mariadb:10.5
+    env_file: .env
+    restart: always
+    ports:
+    - "3306:3306"
+    networks:
+    - desaccess-net

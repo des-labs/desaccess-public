@@ -1,0 +1,9 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+scripts/user_certs/
+active.kubeconfig
+apps/desaccess/common/build/.env
+.vscode/
+**/_build/

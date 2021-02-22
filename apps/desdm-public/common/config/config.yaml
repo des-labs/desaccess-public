@@ -1,0 +1,68 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: #@ data.values.app_name
+  namespace: #@ data.values.namespace
+spec:
+  type: ClusterIP
+  selector:
+    app: #@ data.values.app_name
+  ports:
+  - port: #@ data.values.service_port
+    targetPort: #@ data.values.service_port
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: #@ data.values.app_name
+  namespace: #@ data.values.namespace
+spec:
+  selector:
+    matchLabels:
+      app: #@ data.values.app_name
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: #@ data.values.app_name
+    spec:
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 1001
+      imagePullSecrets:
+      - name: registry-auth
+      containers:
+      - name: #@ data.values.app_name
+        image: #@ data.values.app_name
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: APP_ROOT
+          value: #@ data.values.webroot
+        - name: JIRA_DEFAULT_ASSIGNEE
+          value: #@ data.values.desaccess_jira_default_assignee
+        - name: POD_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        ports:
+        - containerPort: #@ data.values.service_port
+        volumeMounts:
+        - name: config-all
+          mountPath: "/home/des/config/desaccess.yaml"
+          subPath: "desaccess.yaml"
+      volumes:
+      - name: config-all
+        secret:
+          secretName: #@ data.values.app_name
+          defaultMode: 420

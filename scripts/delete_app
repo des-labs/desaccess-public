@@ -1,0 +1,64 @@
+#!/bin/bash
+
+set -e
+
+scriptPath="$(readlink -f "$0")"
+scriptDir="$(dirname "${scriptPath}")"
+cd "${scriptDir}/.." || exit 1
+
+user=''
+namespace=''
+options="--diff-changes"
+while getopts u:a:n:c:h option
+do
+	case "${option}" in
+		u) user=${OPTARG};;
+		a) appName=${OPTARG};;
+		n) namespace=${OPTARG};;
+		c) targetCluster=${OPTARG};;
+		h)
+			echo -e "Usage:\n\n    "$(basename "${scriptPath}")" -a [app_name] -n [namespace] -c [target_cluster] -u [user]\n\n"
+			exit 0
+			;;
+	esac
+done
+
+if [[ "${user}" == "" ]]; then
+	echo "User name must be specified."
+	"${scriptPath}" -h
+	exit 1
+fi
+
+if [[ "${appName}" == "" ]]; then
+	echo "App name must be specified."
+	"${scriptPath}" -h
+	exit 1
+fi
+
+case "${targetCluster}" in
+	"dev" )
+		targetCluster=cluster-dev
+		;;
+	"prod" )
+		targetCluster=cluster-prod
+		;;
+	*)
+		echo "Invalid target cluster. Supported cluster values are \"dev\" or \"prod\"."
+		"${scriptPath}" -h
+		exit 1
+esac
+
+export KUBECONFIG_TEMPLATE="./private/infrastructure/${targetCluster}/.kube/config"
+export KUBECONFIG="./active.kubeconfig"
+# Copy kubeconfig to a temporary file to ignore changes caused by kubectl
+cp "${KUBECONFIG_TEMPLATE}" "${KUBECONFIG}" || exit 1
+
+context="${user}@${targetCluster}"
+kubectl config use-context "${context}"
+
+kapp delete "${options}" -n "${namespace}" -a "${appName}"
+
+# Clean up temporary kubeconfig
+rm "${KUBECONFIG}"
+
+exit 0

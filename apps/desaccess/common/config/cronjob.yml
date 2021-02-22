@@ -1,0 +1,98 @@
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+kind: CronJob
+apiVersion: batch/v1beta1
+metadata:
+  name: (@= data.values.app_name @)-database-backup
+  namespace: #@ data.values.namespace
+spec:
+  schedule: "13 2 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          securityContext:
+            runAsUser: 999
+            fsGroup: 999
+          volumes:
+          - name: mysql-persistent-storage
+            persistentVolumeClaim:
+              claimName: (@= data.values.app_name @)-mysql
+          containers:
+          - image: "mariadb@sha256:b3116f425f51353e2ba71b04647977b035c2c578d276e2d4285bd2798e8199ae"
+            name: (@= data.values.app_name @)-mysql
+            imagePullPolicy: IfNotPresent
+            command:
+            - /bin/bash
+            args:
+            - -c
+            - mysqldump -u$(MYSQL_USER) -p$(MYSQL_PASSWORD) $(MYSQL_DATABASE) -h desaccess-mysql > /var/lib/mysql/backups/$(MYSQL_DATABASE).$(date "+%Y%m%d%H%M").sql
+            env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: (@= data.values.app_name @)-mysql
+                  key: rootpass
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: (@= data.values.app_name @)-mysql
+                  key: db_name
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: (@= data.values.app_name @)-mysql
+                  key: db_user
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: (@= data.values.app_name @)-mysql
+                  key: db_pass
+            ports:
+            - containerPort: 3306
+            volumeMounts:
+            - name: mysql-persistent-storage
+              mountPath: /var/lib/mysql
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+kind: CronJob
+apiVersion: batch/v1beta1
+metadata:
+  name: (@= data.values.app_name @)-database-prune-backups
+  namespace: #@ data.values.namespace
+spec:
+  schedule: "13 3 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          securityContext:
+            runAsUser: 999
+            fsGroup: 999
+          volumes:
+          - name: mysql-persistent-storage
+            persistentVolumeClaim:
+              claimName: (@= data.values.app_name @)-mysql
+          containers:
+          - image: "mariadb@sha256:b3116f425f51353e2ba71b04647977b035c2c578d276e2d4285bd2798e8199ae"
+            name: (@= data.values.app_name @)-database-prune-backups
+            imagePullPolicy: IfNotPresent
+            command:
+            - /bin/bash
+            args:
+            - -c
+            - for days in {14..30}; do rm -f "/var/lib/mysql/backups/$(MYSQL_DATABASE)."$(date --date="-$days days" +%Y%m%d)*.sql; done;
+            env:
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: (@= data.values.app_name @)-mysql
+                  key: db_name
+            volumeMounts:
+            - name: mysql-persistent-storage
+              mountPath: /var/lib/mysql

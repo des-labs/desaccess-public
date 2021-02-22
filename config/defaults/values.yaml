@@ -1,0 +1,10 @@
+#@data/values
+---
+app_name:
+app_deploy_path_name:
+namespace:
+base_domain:
+push_images: false
+image_repo_base: 
+service_port: 80
+# et cetera

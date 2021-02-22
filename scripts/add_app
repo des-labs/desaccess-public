@@ -1,0 +1,38 @@
+#!/bin/bash
+
+set -e
+
+scriptPath="$(readlink -f "$0")"
+scriptDir="$(dirname "${scriptPath}")"
+cd "${scriptDir}" || exit 1
+
+while getopts a:h option
+do
+	case "${option}" in
+		a) appname=${OPTARG};;
+		h)
+			echo -e "Usage:\n\n    "$(basename "${scriptPath}")" -a [app name]\n\n"
+			exit 0
+			;;
+	esac
+done
+shift $((OPTIND -1))
+
+if [[ "${appname}" == "" ]]; then
+	echo "App name must be specified."
+	"${scriptPath}" -h
+	exit 1
+fi
+
+cd ../apps
+mkdir -p "${appname}/common/build/src"
+mkdir -p "${appname}/common/config"
+mkdir -p "${appname}/cluster-dev/config"
+mkdir -p "${appname}/cluster-prod/config"
+mkdir -p "${appname}/docs"
+
+touch "${appname}/cluster-dev/config/values.yaml"
+touch "${appname}/cluster-prod/config/values.yaml"
+touch "${appname}/common/config/config.yaml"
+sed "s/{{APPNAME}}/${appname}/" "${scriptDir}/new_app_values.tpl.yaml" > "${appname}/common/config/values.yaml"
+cp "${scriptDir}/new_app_config.tpl.yaml" "${appname}/common/config/config.yaml"

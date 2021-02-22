@@ -1,0 +1,160 @@
+#!/bin/bash
+
+set -e
+
+scriptPath="$(readlink -f "$0")"
+scriptDir="$(dirname "${scriptPath}")"
+cd "${scriptDir}/.." || exit 1
+
+templateOnly=0
+buildOnly=0
+push_images=true
+noBuild=0
+build_nocache=false
+pseudonym=''
+user=''
+options="--diff-changes"
+yes=''
+deploy_registry=0
+while getopts u:a:n:c:p:htbdyfr option
+do
+	case "${option}" in
+		u) user=${OPTARG};;
+		a) appName=${OPTARG};;
+		n) namespace=${OPTARG};;
+		c) targetCluster=${OPTARG};;
+		t) templateOnly=1;;
+		b)
+			buildOnly=1
+			push_images=false
+			;;
+		d)
+			noBuild=1
+			push_images=false
+			;;
+		p) pseudonym=${OPTARG};;
+		y) yes="--yes" ;;
+		f) build_nocache=true ;;
+		r) deploy_registry=1 ;;
+		h)
+			echo -e "Usage:\n\n    "$(basename "${scriptPath}")" -a [app_name] -n [namespace] -c [target_cluster] -u [user] [-t] [-b] [-d] [-f]\n\n"
+			echo "      -t Output template only"
+			echo "      -b Build image only. Do not push image or deploy."
+			echo "      -d Deploy only. Do not build or push an image."
+			echo "      -p Deploy app using a pseudonym."
+			echo "      -f Build images without cache (force complete rebuild)."
+			echo "      -r Deploy the image registry access credentials to the target namespace."
+			exit 0
+			;;
+	esac
+done
+
+if [[ "${user}" == "" ]]; then
+	echo "User name must be specified."
+	"${scriptPath}" -h
+	exit 1
+fi
+
+if [[ "${appName}" == "" ]]; then
+	echo "App name must be specified."
+	"${scriptPath}" -h
+	exit 1
+fi
+
+if [[ ! -d "./apps/${appName}/common" ]]; then
+	echo "App \"${appName}\" not found."
+	exit 1
+fi
+
+if [[ "${pseudonym}" != "" ]]; then
+	echo "Deploying app \"${appName}\" using pseudonym \"${pseudonym}\"..."
+else
+	pseudonym="${appName}"
+fi
+
+case "${targetCluster}" in
+	"dev" )
+		targetCluster=cluster-dev
+		;;
+	"prod" )
+		targetCluster=cluster-prod
+		;;
+	*)
+		echo "Invalid target cluster. Supported cluster values are \"dev\" or \"prod\"."
+		"${scriptPath}" -h
+		exit 1
+esac
+
+export KUBECONFIG_TEMPLATE="./private/infrastructure/${targetCluster}/.kube/config"
+export KUBECONFIG="./active.kubeconfig"
+# Copy kubeconfig to a temporary file to ignore changes caused by kubectl
+cp "${KUBECONFIG_TEMPLATE}" "${KUBECONFIG}" || exit 1
+
+context="${user}@${targetCluster}"
+kubectl config use-context "${context}"
+
+# Deploy the image registry credentials
+if [[ "${deploy_registry}" == "1" ]]; then
+	echo "Updating the image registry credentials in the target namespace \"${namespace}\"..."
+	if [[ "${yes}" == "--yes" ]]; then
+		kapp deploy --diff-changes --yes -a registry-auth -n "${namespace}" -f ./infrastructure/common/registry-auth.yaml
+	else
+		kapp deploy --diff-changes       -a registry-auth -n "${namespace}" -f ./infrastructure/common/registry-auth.yaml
+	fi
+fi
+
+# Execute any pre-build scripts
+prebuildScript="./apps/${appName}/common/build/scripts/prebuild.sh"
+if [[ -x "${prebuildScript}" ]]; then
+	echo "Running pre-build script: ${prebuildScript}..."
+	"${prebuildScript}"
+fi
+
+configText="$(ytt                                              \
+	--dangerous-allow-all-symlink-destinations                 \
+	--ignore-unknown-comments                                  \
+	--data-value-yaml push_images="${push_images}"             \
+	--data-value-yaml build.nocache="${build_nocache}"         \
+	-f ./config/defaults                                       \
+	-f ./config/"${targetCluster}"/cluster                     \
+	-f ./config/"${targetCluster}"/namespace/"${namespace}"    \
+	-f ./apps/"${appName}"/common/config                       \
+	-f ./apps/"${appName}"/"${targetCluster}"/config           \
+	-v app_name="${pseudonym}"                                 \
+	-v namespace="${namespace}"                                \
+	)"
+
+case 1 in
+	"${templateOnly}" )
+		echo "${configText}"
+		;;
+	"${buildOnly}" )
+		echo "${configText}" | kbld -f-
+		;;
+	"${noBuild}" )
+		if [[ "${yes}" == "--yes" ]]; then
+			kapp deploy "${options}" --yes -n "${namespace}" -a "${pseudonym}" -f <( echo "${configText}" )
+		else
+			kapp deploy "${options}" -n "${namespace}" -a "${pseudonym}" -f <( echo "${configText}" )
+		fi
+		;;
+	*)
+		if [[ "${yes}" == "--yes" ]]; then
+			kapp deploy "${options}" --yes -n "${namespace}" -a "${pseudonym}" -f <( echo "${configText}" | kbld -f- )
+		else
+			kapp deploy "${options}" -n "${namespace}" -a "${pseudonym}" -f <( echo "${configText}" | kbld -f- )
+		fi
+		;;
+esac
+
+# Execute any post-build scripts
+postbuildScript="./apps/${appName}/common/build/scripts/postbuild.sh"
+if [[ -x "${postbuildScript}" ]]; then
+	echo "Running post-build script: ${postbuildScript}..."
+	"${postbuildScript}"
+fi
+
+# Clean up temporary kubeconfig
+rm "${KUBECONFIG}"
+
+exit 0

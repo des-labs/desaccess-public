@@ -1,0 +1,139 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<!--
+<script src="../bower_components/web-component-tester/browser.js"></script>
+<script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+-->
+
+<!-- FONTS -->
+<link href="https://fonts.googleapis.com/css?family=Droid+Sans|Lato:400,700|Open+Sans+Condensed:700|Open+Sans" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=News+Cycle:400,700" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet">
+<link rel="import" href="my-icons.html">
+<link rel="import" href="shared-styles.html">
+
+<!-- BOWER -->
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/iron-autogrow-textarea/iron-autogrow-textarea.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/iron-form/iron-form.html">
+
+<link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-styles/paper-styles.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-search/paper-search-bar.html">
+<link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../bower_components/app-menu/app-menu.html">
+<link rel="import" href="../bower_components/app-menu/app-submenu.html">
+
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icons/hardware-icons.html">
+<link rel="import" href="../bower_components/iron-icons/communication-icons.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/l2t-paper-slider/l2t-paper-slider.html">
+
+
+<!-- OTHER ELEMENTS-->
+<link rel="import" href="../other_components/mp-slider-master/mp-slider.html">
+<link rel="import" href="../other_components/sublistbox-gist/collapse-button.html">
+
+
+<!-- DES ELEMENTS -->
+<link rel="import" href="des-public-main.html">
+<!-- DES PAGES -->
+<link rel="import" href="des-card.html">
+<link rel="import" href="des-pages/des-home.html">
+<link rel="import" href="des-pages/des-thankyou.html">
+<link rel="import" href="des-pages/des-about.html">
+<link rel="import" href="des-pages/des-easyweb.html">
+<link rel="import" href="des-pages/des-releases.html">
+<link rel="import" href="des-pages/des-view404.html">
+<link rel="import" href="des-pages/des-supported.html">
+<link rel="import" href="des-pages/des-help.html">
+<link rel="import" href="des-pages/des-terms.html">
+<!-- DES UTILS -->
+<link rel="import" href="des-utils/des-img.html">
+<link rel="import" href="des-utils/des-img-big.html">
+
+<!-- DES SVA1 -->
+<link rel="import" href="des-sva1/des-sva1.html">
+<link rel="import" href="des-sva1/des-file-content.html">
+<link rel="import" href="des-sva1/des-docs.html">
+<link rel="import" href="des-sva1/des-docs-gold.html">
+<link rel="import" href="des-sva1/des-docs-shear.html">
+<link rel="import" href="des-sva1/des-docs-svmaps.html">
+<link rel="import" href="des-sva1/des-docs-photoz.html">
+<link rel="import" href="des-sva1/des-docs-redmapper.html">
+<!-- DES Y1A1 -->
+<link rel="import" href="des-y1a1/des-y1a1.html">
+<link rel="import" href="des-y1a1/des-y1a1-gold.html">
+<link rel="import" href="des-y1a1/des-y1a1-bao.html">
+<link rel="import" href="des-y1a1/des-y1a1-density.html">
+<link rel="import" href="des-y1a1/des-y1a1-voids.html">
+<link rel="import" href="des-y1a1/des-y1a1-photoz.html">
+<link rel="import" href="des-y1a1/des-y1a1-key-products.html">
+<link rel="import" href="des-y1a1/des-y1a1-key-catalogs.html">
+<link rel="import" href="des-y1a1/gold/morphology.html">
+<link rel="import" href="des-y1a1/gold/star-galaxy.html">
+<link rel="import" href="des-y1a1/gold/footprint.html">
+<link rel="import" href="des-y1a1/key-catalogs/mof.html">
+<link rel="import" href="des-y1a1/key-catalogs/psf.html">
+<link rel="import" href="des-y1a1/key-catalogs/shape.html">
+<link rel="import" href="des-y1a1/key-catalogs/photoz.html">
+<link rel="import" href="des-y1a1/key-catalogs/redmagic.html">
+<link rel="import" href="des-y1a1/key-catalogs/redmapper.html">
+<link rel="import" href="des-y1a1/gold/systematics.html">
+<!-- DES DR1 -->
+<link rel="import" href="des-dr1/des-dr1.html">
+<link rel="import" href="des-dr1/des-dr1docs.html">
+<link rel="import" href="des-dr1/des-dr1-products.html">
+<link rel="import" href="des-dr1/des-dr1-schema.html">
+<link rel="import" href="des-dr1/des-dr1-soft.html">
+<link rel="import" href="des-dr1/des-dr1-observing.html">
+<link rel="import" href="des-dr1/des-dr1-quality.html">
+<link rel="import" href="des-dr1/des-dr1-known-issues.html">
+<link rel="import" href="des-dr1/des-dr1-faq.html">
+<link rel="import" href="des-dr1/des-dr1-access.html">
+<link rel="import" href="des-dr1/des-dr1-ncsa.html">
+<link rel="import" href="des-dr1/des-dr1-team.html">
+<link rel="import" href="des-dr1/des-dr1-noao.html">
+<link rel="import" href="des-dr1/des-dr1-linea.html">
+<!-- DES DR2 -->
+<link rel="import" href="des-dr2/des-dr2.html">
+<link rel="import" href="des-dr2/des-dr2docs.html">
+<link rel="import" href="des-dr2/des-dr2-soft.html">
+<link rel="import" href="des-dr2/des-dr2-products.html">
+<link rel="import" href="des-dr2/des-dr2-schema.html">
+<link rel="import" href="des-dr2/des-dr2-access.html">
+<link rel="import" href="des-dr2/des-dr2-transformations.html">
+
+<!-- DES SN -->
+<link rel="import" href="des-sn/des-sn.html">
+<!-- DES Other -->
+<link rel="import" href="des-other/des-other.html">
+<link rel="import" href="des-other/des-y3-rrl.html">
+<link rel="import" href="des-other/des-y6-rrl.html">
+<link rel="import" href="des-other/des-y3-mlt.html">
+<link rel="import" href="des-other/des-y3-lt-widebinaries.html">
+<link rel="import" href="des-other/des-y3-lsbg.html">
+<link rel="import" href="des-other/des-paper-data.html">

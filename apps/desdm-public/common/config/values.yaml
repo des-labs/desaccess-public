@@ -1,0 +1,5 @@
+#@data/values
+---
+app_name: desdm-public
+service_port: 8080
+desaccess_jira_default_assignee: 'alice'

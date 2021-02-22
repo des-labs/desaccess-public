@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+    <title>DES Data Management</title>
+    <meta name="description" content="des_public_new-app description">
+
+    <script>
+
+      window.Polymer = {
+        rootPath: '{{rootPath}}'
+      };
+      // Load and register pre-caching Service Worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('{{rootPath}}static/service-worker.js', {
+            scope: '{{rootPath}}static/',
+          });
+        });
+      }
+    </script>
+
+  <base href="/">
+  <!-- See https://goo.gl/OOhYW5 -->
+  <link rel="manifest" href="{{rootPath}}static/manifest.json">
+
+  <!--
+  <script src="/static/scripts/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  -->
+  <script src="{{rootPath}}static/bower_components/webcomponentsjs/webcomponents-loader.js"></script>
+  <link rel="import" href="{{rootPath}}static/des_components/elements-built.html">
+
+
+    <style>
+    html {
+        font-size: 18px;
+
+    }
+    @media only screen and (max-device-width: 480px) {
+	html { font-size: 15px; }
+    }
+    @media only screen and (min-device-width: 3500px) {
+	html { font-size: 25px; }
+    }
+      body {
+        margin: 0;
+        font-family: 'Droid Sans', 'Noto', sans-serif;
+        line-height: 1.5;
+        background-color: white;
+       overflow-y: hidden;
+      }
+
+    </style>
+  </head>
+  <body>
+    <des-public-main></des-public-main>
+
+
+
+    <script type="text/javascript">
+    var sc_project=10767484;
+    var sc_invisible=1;
+    var sc_security="cb84a738";
+    var sc_https=1;
+    var scJsHost = (("https:" == document.location.protocol) ?
+    "https://secure." : "http://www.");
+    document.write("<sc"+"ript type='text/javascript' src='" +
+    scJsHost+
+    "statcounter.com/counter/counter.js'></"+"script>");
+    </script>
+    <noscript><div class="statcounter"><a title="web statistics"
+    href="http://statcounter.com/free-web-stats/"
+    target="_blank"><img class="statcounter"
+    src="http://c.statcounter.com/10767484/0/cb84a738/1/"
+    alt="web statistics"></a></div></noscript>
+
+  </body>
+
+</html>

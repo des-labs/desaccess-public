@@ -1,0 +1,549 @@
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: (@= data.values.app_name @)-frontend
+  namespace: #@ data.values.namespace
+spec:
+  type: ClusterIP
+  ports:
+  - port: #@ data.values.service_port
+  selector:
+    app: (@= data.values.app_name @)-frontend
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: (@= data.values.app_name @)-frontend
+  namespace: #@ data.values.namespace
+spec:
+  selector:
+    matchLabels:
+      app: (@= data.values.app_name @)-frontend
+  strategy: 
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  replicas: #@ data.values.replicas
+  template:
+    metadata:
+      labels:
+        app: (@= data.values.app_name @)-frontend
+    spec:
+      imagePullSecrets:
+      - name: registry-auth
+      volumes:
+      - name: srv-volume
+        emptyDir: {}
+      initContainers:
+      - image: (@= data.values.app_name @)-frontend
+        name: init
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsUser: 0
+          runAsGroup: 0
+        command: ['/bin/bash', '-c', 'cp -R /srv/* /nodesrv/ && cd /nodesrv && source init.sh && chown -R node:node /nodesrv']
+        volumeMounts:
+        - name: srv-volume
+          mountPath: /nodesrv
+        env:
+          - name: DESACCESS_INTERFACE
+            value: #@ data.values.desaccess_interface
+          - name: NPM_SCRIPT
+            value: #@ data.values.npm_build
+          - name: BACKEND_BASE_URL
+            value: https://(@= data.values.base_domain @)
+          - name: FRONTEND_BASE_URL
+            value: https://(@= data.values.base_domain @)
+          - name: API_ROOT_PATH
+            value: #@ data.values.apiroot
+          - name: WEB_ROOT_PATH
+            value: #@ data.values.webroot
+          - name: FILESERVER_ROOT_PATH
+            value: #@ data.values.fileroot
+          - name: LIMIT_CUTOUTS_CUTOUTS_PER_JOB
+            value: (@= str(data.values.LIMIT_CUTOUTS_CUTOUTS_PER_JOB) @)
+          - name: TICKET_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: (@= data.values.app_name @)-desticket-auth
+                key: auth
+      containers:
+      - image: (@= data.values.app_name @)-frontend
+        name: (@= data.values.app_name @)-frontend
+        imagePullPolicy: Always
+        command: ['/bin/bash', '-c', 'cd /nodesrv && bash frontend.entrypoint.sh']
+        ports:
+        - containerPort: #@ data.values.service_port
+        volumeMounts:
+        - name: srv-volume
+          mountPath: /nodesrv
+        env:
+          - name: DESACCESS_INTERFACE
+            value: #@ data.values.desaccess_interface
+          - name: NPM_SCRIPT
+            value: #@ data.values.npm_build
+          - name: BACKEND_BASE_URL
+            value: https://(@= data.values.base_domain @)
+          - name: FRONTEND_BASE_URL
+            value: https://(@= data.values.base_domain @)
+          - name: API_ROOT_PATH
+            value: #@ data.values.apiroot
+          - name: WEB_ROOT_PATH
+            value: #@ data.values.webroot
+          - name: FILESERVER_ROOT_PATH
+            value: #@ data.values.fileroot
+          - name: TICKET_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: (@= data.values.app_name @)-desticket-auth
+                key: auth
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: (@= data.values.app_name @)-backend
+  namespace: #@ data.values.namespace
+spec:
+  type: ClusterIP
+  ports:
+  - port: #@ data.values.service_port_backend
+    name: tornado
+  - port: 4444
+    name: debugger
+  selector:
+    app: (@= data.values.app_name @)-backend
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: (@= data.values.app_name @)-backend
+  namespace: #@ data.values.namespace
+spec:
+  selector:
+    matchLabels:
+      app: (@= data.values.app_name @)-backend
+  strategy:
+    type: Recreate
+  replicas: #@ data.values.replicas
+  template:
+    metadata:
+      labels:
+        app: (@= data.values.app_name @)-backend
+    spec:
+      serviceAccountName: jobhandler
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 1001
+      imagePullSecrets:
+      - name: registry-auth
+      containers:
+      - image: (@= data.values.app_name @)-backend
+        name: (@= data.values.app_name @)-backend
+        imagePullPolicy: Always
+        command: ["python3", "main.py"]
+        ports:
+        - containerPort: #@ data.values.service_port_backend
+        env:
+          # The PersistentVolumeClaim naming convention is to use a common base string
+          # and append the task/job type dynamically
+          - name: PVC_NAME_BASE
+            value: (@= data.values.app_name @)-tasks
+          - name: BASE_PATH
+            value: #@ data.values.apiroot
+          - name: BASE_DOMAIN
+            value: (@= data.values.base_domain @)
+          - name: TLS_SECRET
+            value: #@ data.values.tls_secret
+          - name: FRONTEND_BASE_URL
+            value: https://(@= data.values.base_domain @)(@= data.values.webroot @)
+          - name: SERVICE_PORT
+            value: (@= str(data.values.service_port_backend) @)
+          - name: API_BASE_URL
+            value: http://(@= data.values.app_name @)-backend:(@= str(data.values.service_port_backend) @)(@= data.values.apiroot @)
+          # The JobHandler needs the immutable tagged Docker image name for each task for which it will
+          # spawn k8s Jobs. These are generated dynamically by the Kubernetes Tools (kbld), which
+          # replaces all "image" key values with the image name when this template is rendered.
+          #! - name: DOCKER_IMAGE_TASK_TEST
+          #!   valueFrom:
+          #!     configMapKeyRef:
+          #!       name: (@= data.values.app_name @)-task-test-image-configmap
+          #!       key: image
+          - name: DOCKER_IMAGE_TASK_QUERY
+            valueFrom:
+              configMapKeyRef:
+                name: (@= data.values.app_name @)-task-query-image-configmap
+                key: image
+          - name: DOCKER_IMAGE_TASK_CUTOUT
+            valueFrom:
+              configMapKeyRef:
+                name: (@= data.values.app_name @)-task-cutout-image-configmap
+                key: image
+          #! - name: DOCKER_IMAGE_TASK_UTILITY
+          #!   valueFrom:
+          #!     configMapKeyRef:
+          #!       name: (@= data.values.app_name @)-task-utility-image-configmap
+          #!       key: image
+          #! - name: DOCKER_IMAGE_JLAB_SYNC
+          #!   valueFrom:
+          #!     configMapKeyRef:
+          #!       name: (@= data.values.app_name @)-jlab-sync-image-configmap
+          #!       key: image
+          - name: INGRESS_CLASS_JLAB_SERVER
+            value: (@= data.values.ingress_class @)
+          - name: DOCKER_IMAGE_JLAB_SERVER
+            #! value: "jupyter/scipy-notebook@sha256:e89b7047155fdf359152cf3fa34140e4ce8158d96eabb15fe42cc8cf587b6635"
+            valueFrom:
+              configMapKeyRef:
+                name: (@= data.values.app_name @)-jlab-server-image-configmap
+                key: image
+          - name: MYSQL_HOST
+            value: (@= data.values.app_name @)-mysql
+          - name: MYSQL_DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: (@= data.values.app_name @)-mysql
+                key: db_name
+          - name: MYSQL_USER
+            valueFrom:
+              secretKeyRef:
+                name: (@= data.values.app_name @)-mysql
+                key: db_user
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: (@= data.values.app_name @)-mysql
+                key: db_pass
+          - name: SERVICE_ACCOUNT_DB
+            valueFrom:
+              secretKeyRef:
+                name: (@= data.values.app_name @)-service-accounts
+                key: db
+          - name: SERVICE_ACCOUNT_USER
+            valueFrom:
+              secretKeyRef:
+                name: (@= data.values.app_name @)-service-accounts
+                key: user
+          - name: SERVICE_ACCOUNT_PASS
+            valueFrom:
+              secretKeyRef:
+                name: (@= data.values.app_name @)-service-accounts
+                key: pass
+          - name: HOST_NETWORK
+            value: "false"
+          - name: JWT_TTL_SECONDS
+            value: "3600"
+          - name: DROP_TABLES
+            value: #@ data.values.drop_tables
+          - name: DEBUG_JOB
+            value: #@ data.values.debug_job
+          - name: CONFIG_FOLDER_ROOT
+            value: "/"
+          - name: JWT_HS256_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: (@= data.values.app_name @)-jwt
+                key: jwt_hs256_secret
+          - name: ORACLE_USER_MANAGER_DB_PRIVATE
+            value: 'desoper'
+          - name: ORACLE_USER_MANAGER_DB_PRIVATE_DBS
+            value: 'desoper,dessci'
+          - name: DESACCESS_INTERFACE
+            value: #@ data.values.desaccess_interface
+          - name: DESACCESS_ADMIN_EMAILS
+            value: 'desaccess-admins@example.com'
+          - name: DESACCESS_PUBLIC_EMAILS
+            value: 'desaccess-public@example.com'
+          - name: DESACCESS_PRIVATE_EMAILS
+            value: 'desaccess-collab@example.com'
+          - name: ORACLE_USER_MANAGER_DB_PUBLIC
+            value: 'desdr'
+          - name: ORACLE_USER_MANAGER_DB_PUBLIC_DBS
+            value: 'desdr'
+          - name: ALLOWED_ROLE_LIST
+            value: #@ data.values.desaccess_allowed_role_list
+          - name: JIRA_DEFAULT_ASSIGNEE
+            value: #@ data.values.desaccess_jira_default_assignee
+          - name: LIMIT_CUTOUTS_CONCURRENT_JOBS
+            value: (@= str(data.values.LIMIT_CUTOUTS_CONCURRENT_JOBS) @)
+          - name: LIMIT_CUTOUTS_CUTOUTS_PER_JOB
+            value: (@= str(data.values.LIMIT_CUTOUTS_CUTOUTS_PER_JOB) @)
+          - name: LIMIT_MAX_JOB_DURATION_HOURS
+            value: (@= str(data.values.LIMIT_MAX_JOB_DURATION_HOURS) @)
+          - name: DESACCESS_JOB_FILES_LIFETIME
+            value: (@= str(data.values.DESACCESS_JOB_FILES_LIFETIME) @)
+          - name: DESACCESS_JOB_FILES_WARNING_PERIOD
+            value: (@= str(data.values.DESACCESS_JOB_FILES_WARNING_PERIOD) @)
+          - name: DESACCESS_JOB_FILES_MAX_RENEWALS
+            value: (@= str(data.values.DESACCESS_JOB_FILES_MAX_RENEWALS) @)
+          - name: MONITOR_SERVICE_ACCOUNT_USERNAME
+            value: (@= str(data.values.MONITOR_SERVICE_ACCOUNT_USERNAME) @)
+        volumeMounts:
+        - name: db-init
+          mountPath: "/config"
+          # subPath: "db_init.yaml"
+        - name: job-files
+          mountPath: "/jobfiles"
+        - name: jira-access
+          mountPath: "/home/worker/jira_access.yaml"
+          subPath: "jira_access.yaml"
+        - name: oracle-user-manager
+          mountPath: "/home/worker/oracle_user_manager.yaml"
+          subPath: "oracle_user_manager.yaml"
+        - name: desarchive-volume
+          mountPath: '/des003/desarchive'
+        - name: coadd-volume
+          mountPath: '/des004/coadd'
+        - name: dr1-volume
+          mountPath: '/tiles/dr1'
+        - name: dr2-volume
+          mountPath: '/tiles/dr2'
+        - name: email-file-storage
+          mountPath: '/email_list'
+      volumes:
+      - name: db-init
+        configMap:
+          name: (@= data.values.app_name @)-backend-configmap
+          items:
+          - key: db_init
+            path: "db_init.yaml"
+      - name: job-files
+        persistentVolumeClaim:
+          claimName: (@= data.values.app_name @)-tasks
+      - name: jira-access
+        secret:
+          secretName: (@= data.values.app_name @)-jira
+      - name: oracle-user-manager
+        secret:
+          secretName: (@= data.values.app_name @)-oracle-user-manager
+      - name: desarchive-volume
+        readOnly: true
+        hostPath:
+          path: "/des003/desarchive"
+      - name: coadd-volume
+        readOnly: true
+        hostPath:
+          path: "/des004/coadd"
+      - name: dr1-volume
+        readOnly: true
+        hostPath:
+          path: "/des004/despublic/dr1_tiles"
+      - name: dr2-volume
+        readOnly: true
+        hostPath:
+          path: "/des004/despublic/dr2_tiles"
+      - name: email-file-storage
+        persistentVolumeClaim:
+          claimName: (@= data.values.app_name @)-email
+
+#! #@ load("@ytt:data", "data")
+#! #@yaml/text-templated-strings
+#! ---
+#! kind: ConfigMap
+#! apiVersion: v1
+#! metadata:
+#!   name: (@= data.values.app_name @)-task-test-image-configmap
+#!   namespace: #@ data.values.namespace
+#! data:
+#!   image: (@= data.values.app_name @)-task-test
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: (@= data.values.app_name @)-task-cutout-image-configmap
+  namespace: #@ data.values.namespace
+data:
+  image: (@= data.values.app_name @)-task-cutout
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: (@= data.values.app_name @)-task-query-image-configmap
+  namespace: #@ data.values.namespace
+data:
+  image: (@= data.values.app_name @)-task-query
+
+#! #@ load("@ytt:data", "data")
+#! #@yaml/text-templated-strings
+#! ---
+#! kind: ConfigMap
+#! apiVersion: v1
+#! metadata:
+#!   name: (@= data.values.app_name @)-task-utility-image-configmap
+#!   namespace: #@ data.values.namespace
+#! data:
+#!   image: (@= data.values.app_name @)-task-utility
+
+#! #@ load("@ytt:data", "data")
+#! #@yaml/text-templated-strings
+#! ---
+#! kind: ConfigMap
+#! apiVersion: v1
+#! metadata:
+#!   name: (@= data.values.app_name @)-jlab-sync-image-configmap
+#!   namespace: #@ data.values.namespace
+#! data:
+#!   image: (@= data.values.app_name @)-jlab-sync
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: (@= data.values.app_name @)-jlab-server-image-configmap
+  namespace: #@ data.values.namespace
+data:
+  image: (@= data.values.app_name @)-jlab-server
+
+#@ load("@ytt:data", "data")
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jobhandler
+  namespace: #@ data.values.namespace
+
+#@ load("@ytt:data", "data")
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: Role
+metadata:
+  name: job-manager
+  namespace: #@ data.values.namespace
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "configmaps", "deployments", "services", "ingresses"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  - apiGroups: ["extensions", "apps"]
+    resources: ["pods", "pods/log", "configmaps", "deployments", "services", "deployments/status"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["services", "ingresses"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  - apiGroups: ["batch"]
+    resources: ["jobs", "jobs/status", "configmaps"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+
+#@ load("@ytt:data", "data")
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: job-manager_jobhandler
+  namespace: #@ data.values.namespace
+roleRef:
+  kind: Role
+  name: job-manager
+  namespace: #@ data.values.namespace
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+  - kind: ServiceAccount
+    name: jobhandler
+    namespace: #@ data.values.namespace
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: (@= data.values.app_name @)-(@= data.values.namespace @)-tasks
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: (@= data.values.host_root_path @)/deslabs-legacy/tasks
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: (@= data.values.app_name @)-tasks
+  namespace: #@ data.values.namespace
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: (@= data.values.app_name @)-(@= data.values.namespace @)-tasks
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: (@= data.values.app_name @)-(@= data.values.namespace @)-email
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: (@= data.values.host_root_path @)/deslabs-legacy/email
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: (@= data.values.app_name @)-email
+  namespace: #@ data.values.namespace
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: (@= data.values.app_name @)-(@= data.values.namespace @)-email
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: (@= data.values.app_name @)-backend-configmap
+  namespace: #@ data.values.namespace
+data:
+  db_init: |
+    role:
+    # Private database usernames
+    - username: alice
+      role_name: admin
+    - username: bob
+      role_name: admin

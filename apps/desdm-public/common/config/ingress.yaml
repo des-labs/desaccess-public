@@ -1,0 +1,27 @@
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1beta1
+metadata:
+  name: #@ data.values.app_name
+  namespace: #@ data.values.namespace
+  annotations:
+    kubernetes.io/ingress.class: #@ data.values.ingress_class
+    #! # To enable basic HTTP authentication, uncomment the following lines:
+    #! nginx.ingress.kubernetes.io/auth-type: basic
+    #! nginx.ingress.kubernetes.io/auth-secret: (@= data.values.app_name @)-auth
+    #! nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required'
+spec:
+  tls:
+  - hosts:
+    - #@ data.values.base_domain
+    secretName: #@ data.values.tls_secret
+  rules:
+  - http:
+     paths:
+     - path: /(@= data.values.webroot @)
+       backend:
+         serviceName: #@ data.values.app_name
+         servicePort: #@ data.values.service_port
+    host: #@ data.values.base_domain

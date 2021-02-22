@@ -1,0 +1,78 @@
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+apiVersion: kbld.k14s.io/v1alpha1
+kind: Sources
+sources:
+- image: (@= data.values.app_name @)-frontend
+  path: ./apps/(@= data.values.app_deploy_path_name @)/common/build
+  docker:
+    build:
+      file: "Dockerfile-frontend"
+      noCache: false
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+apiVersion: kbld.k14s.io/v1alpha1
+kind: Sources
+sources:
+- image: (@= data.values.app_name @)-backend
+  path: ./apps/(@= data.values.app_deploy_path_name @)/common/build
+  docker:
+    build:
+      file: "Dockerfile-backend"
+      noCache: false
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+apiVersion: kbld.k14s.io/v1alpha1
+kind: Sources
+sources:
+- image: (@= data.values.app_name @)-jlab-server
+  path: ./apps/(@= data.values.app_deploy_path_name @)/common/build/src/jupyter
+  docker:
+    build:
+      file: "Dockerfile"
+      noCache: false
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+apiVersion: kbld.k14s.io/v1alpha1
+kind: Sources
+sources:
+- image: (@= data.values.app_name @)-task-cutout
+  path: ./apps/(@= data.values.app_deploy_path_name @)/common/build/src/des-jobhandler/des_tasks/cutout
+  docker:
+    build:
+      file: "Dockerfile"
+      noCache: false
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+apiVersion: kbld.k14s.io/v1alpha1
+kind: Sources
+sources:
+- image: (@= data.values.app_name @)-task-query
+  path: ./apps/(@= data.values.app_deploy_path_name @)/common/build/src/des-jobhandler/des_tasks/query
+  docker:
+    build:
+      file: "Dockerfile"
+      noCache: false
+
+
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+---
+apiVersion: kbld.k14s.io/v1alpha1
+kind: Sources
+sources:
+- image: (@= data.values.app_name @)-desaccess-docs
+  path: ./apps/(@= data.values.app_deploy_path_name @)/common/build/src/desaccess-docs
+  docker:
+    build:
+      file: "Dockerfile"
+      noCache: false
