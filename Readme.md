@@ -21,6 +21,4 @@ Learn more
 * https://deslabs.ncsa.illinois.edu/projects.html
 * https://des.ncsa.illinois.edu/releases/dr2/dr2-access/dr2-ncsa
 
-<img height="60px" src="https://des.ncsa.illinois.edu/desaccess/images/NCSA_FullColor_RGB.png" />
-<img height="60px" src="https://des.ncsa.illinois.edu/desaccess/images/NSF_4-Color_bitmap_Logo_100px.png" />
-<img height="60px" src="https://des.ncsa.illinois.edu/desaccess/images/des-logo-rev-lg.png" />
+<img height="60px" src="https://des.ncsa.illinois.edu/desaccess/images/NCSA_FullColor_RGB.png" /><img height="60px" src="https://des.ncsa.illinois.edu/desaccess/images/NSF_4-Color_bitmap_Logo_100px.png" /><img height="60px" src="https://des.ncsa.illinois.edu/desaccess/images/des-logo-rev-lg.png" />
