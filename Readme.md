@@ -6,7 +6,7 @@ Overview
 
 [DESaccess](https://des.ncsa.illinois.edu/desaccess/) is an open source set of tools to access and analyze astronomical data, used as a primary research tool by hundreds of astronomer around the globe. 
 
-Developed at the [National Center for Supercomputing Applications (NCSA)](http://http://www.ncsa.illinois.edu/), DESaccess provides a primary set of basic web applications and a programmatic API to access [Dark Energy Survey (DES)](https://www.darkenergysurvey.org/) release data. It provides an interface to submit asynchronous jobs that perform potentially lengthy operations involving the DES release catalogs stored on the co-located Oracle database. These jobs include executing SQL statements and generating cutouts from the image data given list of positions and desired areal dimensions. 
+Developed at the [National Center for Supercomputing Applications (NCSA)](http://www.ncsa.illinois.edu/), DESaccess provides a primary set of basic web applications and a programmatic API to access [Dark Energy Survey (DES)](https://www.darkenergysurvey.org/) release data. It provides an interface to submit asynchronous jobs that perform potentially lengthy operations involving the DES release catalogs stored on the co-located Oracle database. These jobs include executing SQL statements and generating cutouts from the image data given list of positions and desired areal dimensions. 
 
 About this repo
 ---------------------
